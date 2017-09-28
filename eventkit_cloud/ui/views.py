@@ -9,7 +9,7 @@ from django.shortcuts import redirect, render_to_response
 from django.template.context_processors import csrf
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse
-from .data_estimator import get_size_estimate
+from .data_estimator import get_size_estimate, get_osm_feature_count
 from django.contrib.auth import authenticate, login
 from ..api.serializers import UserDataSerializer
 from rest_framework.renderers import JSONRenderer
@@ -171,6 +171,21 @@ def help_presets(request):
         {'configurations_url': configurations_url},
         RequestContext(request)
     )
+
+
+@require_http_methods(['POST'])
+def get_osm_feature_count(request):
+    """
+    :param request: a request with a geojson feature in the body} 
+    :return: the total feature count
+    """
+    request_data = json.loads(request.body)
+    total = 0
+    feature = request_data.get('geojson_feature')
+    if not feature:
+        return HttpResponse('No feature found in the request', status=400)
+    total = get_osm_feature_count(geojson_geometry=feature['geometry'])
+    return HttpResponse([total], status=200)
 
 
 @require_http_methods(['POST'])

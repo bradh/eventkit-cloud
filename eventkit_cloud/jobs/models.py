@@ -158,6 +158,10 @@ class ExportProvider(UIDMixin, TimeStampedModelMixin):
     license = models.ForeignKey(License, related_name='+', null=True, blank=True, default=None)
     zip = models.BooleanField(default=False)
     display = models.BooleanField(default=False)
+    size_estimate_constant = models.FloatField(null=True, default=None, blank=True,
+                                               help_text="This is a constant to help estimate file size. "
+                                                         "For raster sources its the relationship of area (sq km) to output size in GB."
+                                                         "For osm its the relationship of feature count to output size in GB.")
 
     class Meta:  # pragma: no cover
         managed = True

@@ -16,6 +16,8 @@ import debounce from 'lodash/debounce';
 import Info from 'material-ui/svg-icons/action/info';
 import BaseDialog from '../BaseDialog';
 import CustomTextField from "../CustomTextField";
+import axios from 'axios';
+import cookie from 'react-cookie';
 
 
 export class ExportInfo extends React.Component {
@@ -26,6 +28,7 @@ export class ExportInfo extends React.Component {
             formatsDialogOpen: false,
             projectionsDialogOpen: false,
             licenseDialogOpen: false,
+            estimates: {}
         }
         this.onNameChange = this.onNameChange.bind(this);
         this.onDescriptionChange = this.onDescriptionChange.bind(this);
@@ -35,7 +38,8 @@ export class ExportInfo extends React.Component {
         this._initializeOpenLayers = this._initializeOpenLayers.bind(this);
     }
 
-    componentDidMount() {        
+    componentDidMount() {
+        this.getSizeEstimates();
         // if the state does not have required data disable next
         if (!this.hasRequiredFields(this.props.exportInfo)) {
             this.props.setNextDisabled();
@@ -94,6 +98,37 @@ export class ExportInfo extends React.Component {
         else if (nextProps.nextEnabled) {
             this.props.setNextDisabled();
         }
+    }
+
+    getSizeEstimates() {
+        const feature = new ol.format.GeoJSON().readFeature(this.props.geojson.features[0]);
+        const merc_feature = new ol.format.GeoJSON().readFeature(this.props.geojson.features[0], {
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857'
+        });
+
+        const area = merc_feature.getGeometry().getArea() * 0.000001;
+        const bbox = feature.getGeometry().getExtent();
+        const providers = this.props.providers.filter((provider) => {return provider.display});
+
+        // const csrfmiddlewaretoken = cookie.load('csrftoken');
+        
+        providers.forEach(provider => {
+            const state = this.state.estimates;
+            state[provider.name] = provider.size_estimate_constant * area;
+            this.setState({estimates: state});
+            // return axios({
+            //     url: '/estimator',
+            //     method: 'POST',
+            //     data: JSON.stringify({providers: [provider.name], bbox: bbox}),
+            //     headers: {"X-CSRFToken": csrfmiddlewaretoken}
+            // }).then(response => {
+            //     const state = this.state.estimates;
+            //     state[provider.name] = response.data;
+            //     this.setState({estimates: state});
+            //     console.log(response.data);
+            // });
+        });
     }
 
     screenSizeUpdate() {
@@ -246,6 +281,15 @@ export class ExportInfo extends React.Component {
 
     handleLicenseClose = () => {
         this.setState({licenseDialogOpen: false});
+    }
+
+    formatSizeEstimate(size) {
+        if (!size) {
+            return '';
+        }
+        return size > 1 ? `${Number(size).toFixed(3)} GB` 
+            : size > .001 ? `${Number(size * 1000).toFixed(3)} MB` 
+                : `${Number(size * 1000000).toFixed(3)} KB`
     }
 
     render() {
@@ -418,6 +462,7 @@ export class ExportInfo extends React.Component {
                                             style={{backgroundColor: backgroundColor, fontWeight: 'normal', padding: '16px 16px 16px 45px', fontSize: '16px', marginBottom:'0'}}
                                             nestedListStyle={{padding: '0px', backgroundColor: backgroundColor}}
                                             primaryText={provider.name}
+                                            secondaryText={'Estimate for current AOI: ' + this.formatSizeEstimate(this.state.estimates[provider.name])}
                                             leftCheckbox={<Checkbox
                                                 className={'qa-ExportInfo-CheckBox-provider'}
                                                 name={provider.name}

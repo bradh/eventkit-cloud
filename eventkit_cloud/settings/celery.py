@@ -33,6 +33,10 @@ CELERYBEAT_SCHEDULE = {
     'expire-runs': {
         'task': 'Expire Runs',
         'schedule': crontab(minute='0', hour='0', day_of_week='*')
+    },
+    'calculate_averages': {
+        'task': 'Create Size Averages',
+        'schedule': crontab()
     }
 }
 

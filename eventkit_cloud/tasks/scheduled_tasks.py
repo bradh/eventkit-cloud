@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
-
+from string import Template
 from celery.utils.log import get_task_logger
 from eventkit_cloud.celery import app
 
@@ -22,6 +22,58 @@ logger = get_task_logger(__name__)
 #     count = expired_jobs.count()
 #     logger.debug('Purging {0} unpublished exports.'.format(count))
 #     expired_jobs.delete()
+
+
+@app.task(name="Create Size Averages")
+def create_size_averages():
+    """
+    Looks at the last n runs for each provider and calculates an average file size per sq km
+    Adds the new average to the provider model 
+    """
+    from eventkit_cloud.tasks.models import ExportRun
+    from eventkit_cloud.jobs.models import ExportProvider
+    from eventkit_cloud.ui.data_estimator import get_osm_feature_count
+
+    providers = ExportProvider.objects.all()
+    for provider in providers:
+        # get the last 100 completed runs that contain this provider in the provider tasks
+        runs = ExportRun.objects.filter(job__provider_tasks__provider=provider, status='COMPLETED')[:100]
+        if not runs:
+            continue
+
+        if provider.slug == 'osm':
+            gb_per_feature_sum = []
+            for run in runs:
+                total_features = get_osm_feature_count(geojson_geometry=run.job.the_geom.json)
+                file_size_gb = get_file_size(run=run, provider_name=provider.name)
+                gb_per_feature = file_size_gb / int(total_features)
+                gb_per_feature_sum.append(gb_per_feature)
+            # if we have some gb/feature values get the average and save it to the provider model
+            if len(gb_per_feature_sum):
+                total = 0
+                for value in gb_per_feature_sum:
+                    total += value
+                total = total/len(gb_per_feature_sum)
+                provider.size_estimate_constant = total
+                provider.save()
+
+        else:
+            gb_per_sq_km_sum = []
+            for run in runs:
+                # get the area in sq km
+                sq_m = run.job.the_geom_webmercator.area
+                sq_km = sq_m * 0.000001
+                file_size_gb = get_file_size(run=run, provider_name=provider.name)
+                gb_per_sq_km = file_size_gb / sq_km
+                gb_per_sq_km_sum.append(gb_per_sq_km)
+            # if we have some gb/sqkm values get the average and save it to the provider model
+            if len(gb_per_sq_km_sum):
+                total = 0
+                for value in gb_per_sq_km_sum:
+                    total += value
+                total = total/len(gb_per_sq_km_sum)
+                provider.size_estimate_constant = total
+                provider.save()
 
 
 @app.task(name='Expire Runs')
@@ -91,3 +143,31 @@ def send_warning_email(date=None, url=None, addr=None, job_name=None):
     except Exception as e:
         logger.error("Encountered an error when sending status email: {}".format(e))
 
+def get_file_size(run=None, provider_name=None):
+    """
+    :param run: the run object for which file size should be searched 
+    :param provider_name: the name of the provider the files should be for
+    :return: 
+    """
+    if not (run and provider_name):
+        raise Exception('Both run and provider name are required to get file size')
+        return None
+
+    from eventkit_cloud.tasks.models import ExportTask, ExportProviderTask
+    ignored_tasks = ['Area of Interest (.geojson)', 'Project file (.zip)']
+
+    export_provider_tasks = ExportProviderTask.objects.filter(run=run)
+    for export_provider_task in export_provider_tasks:
+        # only check export provider tasks that correspond to the provider in question
+        if export_provider_task.name != provider_name:
+            continue
+        # get all the export tasks associated with the export provider task
+        export_tasks = ExportTask.objects.filter(export_provider_task=export_provider_task)
+        for export_task in export_tasks:
+            # ignore zip files and aoi file
+            if export_task.name not in ignored_tasks:
+                file_size_mb = export_task.result.size
+                if not file_size_mb:
+                    continue
+                file_size_gb = file_size_mb * 0.001
+                return file_size_gb
