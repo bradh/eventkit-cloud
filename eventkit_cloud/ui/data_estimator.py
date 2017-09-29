@@ -61,7 +61,7 @@ def get_osm_feature_count(geojson_geometry=None):
     if not geojson_geometry:
         raise Exception('A geojson geometry is required')
 
-    if type(geojson_geometry is not dict):
+    if type(geojson_geometry) is not dict:
         try:
             geojson_geometry = json.loads(geojson_geometry)
         except:
@@ -84,23 +84,31 @@ def get_osm_feature_count(geojson_geometry=None):
     )
 
     try:
-        req = requests.post(settings.OVERPASS_API_URL, data=query, stream=False, verify=False)
+        req = requests.post(url, data=query, stream=False, verify=verify_ssl)
     except requests.exceptions.RequestException as e:
         logger.error('Overpass query threw: {0}'.format(e))
         raise requests.exceptions.RequestException(e)
 
     if req.status_code == 429:
-        while req.status_code == 429:
+        max = 10
+        attempts = 0
+        while req.status_code == 429 and attempts != max:
             print("We need to wait and try again")
             sleep(15)
             req = requests.post(url, data=query, stream=False, verify=verify_ssl)
+            attempts += 1
     data = None
     try:
         data = json.loads(req.content)
-    except:
-        raise Exception('Could not parse response from OSM server')
-
-    return data['elements'][0]['tags']['total'] or None
+    except Exception as e:
+        print('Could not parse response from OSM server')
+        return None
+    count = 0
+    if 'tags' in data['elements'][0]:
+        count = data['elements'][0]['tags']['total']
+    elif 'count' in data['elements'][0]:
+        count = data['elements'][0]['count']['total']
+    return count or None
 
 def reverse_polygon_lat_lon(coords):
     """

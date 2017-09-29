@@ -174,7 +174,7 @@ def help_presets(request):
 
 
 @require_http_methods(['POST'])
-def get_osm_feature_count(request):
+def osm_feature_count(request):
     """
     :param request: a request with a geojson feature in the body} 
     :return: the total feature count

@@ -6,6 +6,7 @@ from django.core.mail import EmailMultiAlternatives
 from string import Template
 from celery.utils.log import get_task_logger
 from eventkit_cloud.celery import app
+import numpy as np
 
 logger = get_task_logger(__name__)
 
@@ -34,6 +35,7 @@ def create_size_averages():
     from eventkit_cloud.jobs.models import ExportProvider
     from eventkit_cloud.ui.data_estimator import get_osm_feature_count
 
+    logger.debug('Creating size average constants')
     providers = ExportProvider.objects.all()
     for provider in providers:
         # get the last 100 completed runs that contain this provider in the provider tasks
@@ -41,14 +43,22 @@ def create_size_averages():
         if not runs:
             continue
 
+        logger.debug('------------- {0} -------------'.format(provider.slug))
         if provider.slug == 'osm':
             gb_per_feature_sum = []
             for run in runs:
-                total_features = get_osm_feature_count(geojson_geometry=run.job.the_geom.json)
-                file_size_gb = get_file_size(run=run, provider_name=provider.name)
-                gb_per_feature = file_size_gb / int(total_features)
-                gb_per_feature_sum.append(gb_per_feature)
+                try:
+                    total_features = get_osm_feature_count(geojson_geometry=run.job.the_geom.json)
+                except Exception as e:
+                    logger.error(e)
+                    continue
+                if total_features:
+                    file_size_gb = get_file_size(run=run, provider_name=provider.name)
+                    if file_size_gb:
+                        gb_per_feature = file_size_gb / int(total_features)
+                        gb_per_feature_sum.append(gb_per_feature)
             # if we have some gb/feature values get the average and save it to the provider model
+            gb_per_feature_sum = remove_outliers(data_array=gb_per_feature_sum)
             if len(gb_per_feature_sum):
                 total = 0
                 for value in gb_per_feature_sum:
@@ -64,9 +74,11 @@ def create_size_averages():
                 sq_m = run.job.the_geom_webmercator.area
                 sq_km = sq_m * 0.000001
                 file_size_gb = get_file_size(run=run, provider_name=provider.name)
-                gb_per_sq_km = file_size_gb / sq_km
-                gb_per_sq_km_sum.append(gb_per_sq_km)
+                if file_size_gb:
+                    gb_per_sq_km = file_size_gb / sq_km
+                    gb_per_sq_km_sum.append(gb_per_sq_km)
             # if we have some gb/sqkm values get the average and save it to the provider model
+            gb_per_sq_km_sum = remove_outliers(data_array=gb_per_sq_km_sum)
             if len(gb_per_sq_km_sum):
                 total = 0
                 for value in gb_per_sq_km_sum:
@@ -74,6 +86,7 @@ def create_size_averages():
                 total = total/len(gb_per_sq_km_sum)
                 provider.size_estimate_constant = total
                 provider.save()
+    logger.debug('Finished creating size average constants')
 
 
 @app.task(name='Expire Runs')
@@ -166,8 +179,21 @@ def get_file_size(run=None, provider_name=None):
         for export_task in export_tasks:
             # ignore zip files and aoi file
             if export_task.name not in ignored_tasks:
-                file_size_mb = export_task.result.size
-                if not file_size_mb:
-                    continue
-                file_size_gb = file_size_mb * 0.001
-                return file_size_gb
+                result = export_task.result
+                if result:
+                    file_size_mb = result.size
+                    if not file_size_mb or file_size_mb < 0.500:
+                        # ignore files with no reported size or less than 500 kb since that could be an empty file
+                        return 0
+                    file_size_gb = file_size_mb * 0.001
+                    return file_size_gb
+        return 0
+
+def remove_outliers(data_array=[], deviations=2):
+    if not len(data_array) > 3:
+        return data_array
+    stdev = np.std(data_array)
+    median = np.median(data_array)
+    upper_limit = median + (deviations * stdev)
+    lower_limit = median - (deviations * stdev)
+    return [value for value in data_array if lower_limit < value < upper_limit]

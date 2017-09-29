@@ -4,7 +4,7 @@ from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 from django.views.decorators.csrf import ensure_csrf_cookie
-from .views import logout, data_estimator, auth, geocode, get_config, get_osm_feature_count
+from .views import logout, data_estimator, auth, geocode, get_config, osm_feature_count
 from django.conf import settings
 
 urlpatterns = [
@@ -17,7 +17,7 @@ urlpatterns = [
     url(r'^about', login_required(TemplateView.as_view(template_name='ui/index.html')), name="about"),
     url(r'^logout', login_required(logout), name="logout"),
     url(r'^estimator$', login_required(data_estimator)),
-    url(r'^osm_features$', login_required(get_osm_feature_count)),
+    url(r'^osm_features$', login_required(osm_feature_count)),
     url(r'^geocode$', login_required(geocode)),
     url(r'^configuration$', get_config),
 ]

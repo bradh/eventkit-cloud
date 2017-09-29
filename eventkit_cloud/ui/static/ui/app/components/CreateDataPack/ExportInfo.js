@@ -110,24 +110,28 @@ export class ExportInfo extends React.Component {
         const area = merc_feature.getGeometry().getArea() * 0.000001;
         const bbox = feature.getGeometry().getExtent();
         const providers = this.props.providers.filter((provider) => {return provider.display});
-
-        // const csrfmiddlewaretoken = cookie.load('csrftoken');
         
         providers.forEach(provider => {
             const state = this.state.estimates;
-            state[provider.name] = provider.size_estimate_constant * area;
-            this.setState({estimates: state});
-            // return axios({
-            //     url: '/estimator',
-            //     method: 'POST',
-            //     data: JSON.stringify({providers: [provider.name], bbox: bbox}),
-            //     headers: {"X-CSRFToken": csrfmiddlewaretoken}
-            // }).then(response => {
-            //     const state = this.state.estimates;
-            //     state[provider.name] = response.data;
-            //     this.setState({estimates: state});
-            //     console.log(response.data);
-            // });
+            if (provider.slug == 'osm') {
+                const csrfmiddlewaretoken = cookie.load('csrftoken');
+                return axios({
+                    url: '/osm_features',
+                    method: 'POST',
+                    data: JSON.stringify({geojson_feature: this.props.geojson.features[0]}),
+                    headers: {"X-CSRFToken": csrfmiddlewaretoken}
+                }).then(response => {
+                    const featureCount = response.data || 0;
+                    console.log(featureCount)
+                    state[provider.name] = provider.size_estimate_constant * featureCount;
+                    this.setState({estimates: state});
+                });
+            }
+            else {
+                const estimate = provider.size_estimate_constant || 0;
+                state[provider.name] = provider.size_estimate_constant * area;
+                this.setState({estimates: state});
+            }
         });
     }
 
@@ -285,7 +289,10 @@ export class ExportInfo extends React.Component {
 
     formatSizeEstimate(size) {
         if (!size) {
-            return '';
+            return 'Getting estimate';
+        }
+        if(size == 0) {
+            return 'Could not get estimate'
         }
         return size > 1 ? `${Number(size).toFixed(3)} GB` 
             : size > .001 ? `${Number(size * 1000).toFixed(3)} MB` 
