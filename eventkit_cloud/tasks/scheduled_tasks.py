@@ -53,7 +53,7 @@ def create_size_averages():
                     logger.error(e)
                     continue
                 if total_features:
-                    file_size_gb = get_file_size(run=run, provider_name=provider.name)
+                    file_size_gb = get_file_size(run=run, provider_name=provider.name, min_size=0.5)
                     if file_size_gb:
                         gb_per_feature = file_size_gb / int(total_features)
                         gb_per_feature_sum.append(gb_per_feature)
@@ -73,7 +73,7 @@ def create_size_averages():
                 # get the area in sq km
                 sq_m = run.job.the_geom_webmercator.area
                 sq_km = sq_m * 0.000001
-                file_size_gb = get_file_size(run=run, provider_name=provider.name)
+                file_size_gb = get_file_size(run=run, provider_name=provider.name, min_size=2)
                 if file_size_gb:
                     gb_per_sq_km = file_size_gb / sq_km
                     gb_per_sq_km_sum.append(gb_per_sq_km)
@@ -156,14 +156,15 @@ def send_warning_email(date=None, url=None, addr=None, job_name=None):
     except Exception as e:
         logger.error("Encountered an error when sending status email: {}".format(e))
 
-def get_file_size(run=None, provider_name=None):
+def get_file_size(run=None, provider_name=None, min_size=0):
     """
     :param run: the run object for which file size should be searched 
     :param provider_name: the name of the provider the files should be for
+    :param min_size: the minimum file size that can be returned
     :return: 
     """
     if not (run and provider_name):
-        raise Exception('Both run and provider name are required to get file size')
+        logger.error('Both run and provider name are required to get file size')
         return None
 
     from eventkit_cloud.tasks.models import ExportTask, ExportProviderTask
@@ -182,7 +183,7 @@ def get_file_size(run=None, provider_name=None):
                 result = export_task.result
                 if result:
                     file_size_mb = result.size
-                    if not file_size_mb or file_size_mb < 0.500:
+                    if not file_size_mb or file_size_mb < min_size:
                         # ignore files with no reported size or less than 500 kb since that could be an empty file
                         return 0
                     file_size_gb = file_size_mb * 0.001
