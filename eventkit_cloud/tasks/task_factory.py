@@ -22,7 +22,7 @@ from ..ui.helpers import get_style_files
 from ..tasks.export_tasks import (finalize_export_provider_task, TaskPriority,
                                   wait_for_providers_task, TaskStates)
 
-from ..tasks.models import ExportRun, ExportProviderTask
+from ..tasks.models import ExportRun, DataProviderTaskRecord
 from ..tasks.task_runners import create_export_task_record
 from .task_runners import (
     ExportOSMTaskRunner,
@@ -60,7 +60,7 @@ class TaskFactory:
         They need to be finalized (was the task successful?) to update the database state:
             PROVIDER_SUBTASK_CHAIN -> FINALIZE_PROVIDER_TASK
 
-        We also have an optional chain of tasks that get processed after the providers are ran:
+        We also have an optional chain of tasks that get processed after the providers are run:
             AD_HOC_TASK1 -> AD_HOC_TASK2 -> FINALIZE_RUN_TASK = FINALIZE_RUN_TASK_COLLECTION
 
         If the PROVIDER_SUBTASK_CHAIN fails it needs to be cleaned up.  The clean up task also calls the finalize provider
@@ -230,7 +230,7 @@ def create_run(job_uid, user=None):
 def create_task(export_provider_task_uid=None, stage_dir=None, worker=None, selection=None, task=None,
                 job_name=None, user_details=None):
     """
-    Create a new task to export the bounds for an ExportProviderTask
+    Create a new task to export the bounds for an DataProviderTaskRecord
     :param export_provider_task_uid: An export provider task UUID.
     :param worker: The name of the celery worker assigned the task.
     :return: A celery task signature.
@@ -239,7 +239,7 @@ def create_task(export_provider_task_uid=None, stage_dir=None, worker=None, sele
     if user_details is None:
         user_details = {'username': 'unknown-create_task'}
 
-    export_provider_task = ExportProviderTask.objects.get(uid=export_provider_task_uid)
+    export_provider_task = DataProviderTaskRecord.objects.get(uid=export_provider_task_uid)
     export_task = create_export_task_record(
         task_name=task.name, export_provider_task=export_provider_task, worker=worker,
         display=getattr(task, "display", False)
@@ -259,14 +259,15 @@ def get_zip_task_chain(export_provider_task_uid=None, stage_dir=None, worker=Non
                     task=zip_export_provider, job_name=job_name)
     )
 
-def get_invalid_licenses(job):
+def get_invalid_licenses(job, user=None):
     """
     :param user: A user to verify licenses against.
     :param job: The job containing the licensed datasets.
     :return: A list of invalid licenses.
     """
     from ..api.serializers import UserDataSerializer
-    licenses = UserDataSerializer.get_accepted_licenses(job.user)
+    user = user or job.user
+    licenses = UserDataSerializer.get_accepted_licenses(user)
     invalid_licenses = []
     for provider_tasks in job.provider_tasks.all():
         license = provider_tasks.provider.license

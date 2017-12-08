@@ -46,9 +46,14 @@ describe('export actions', () => {
     };
 
     it('updateAoiInfo should return passed in json', () => {
-        expect(actions.updateAoiInfo(geojson, 'Polygon', 'title', 'description')).toEqual({
+        expect(actions.updateAoiInfo({
+            geojson,
+            geomType: 'Polygon',
+            title: 'title',
+            description: 'description',
+        })).toEqual({
             type: 'UPDATE_AOI_INFO',
-            geojson: geojson,
+            geojson,
             geomType: 'Polygon',
             title: 'title',
             description: 'description',
@@ -62,7 +67,7 @@ describe('export actions', () => {
             projectName: 'projectName', 
             makePublic: true, 
             providers: ['provider1'], 
-            area_str: 'area_str', 
+            areaStr: 'areaStr', 
             layers: ['layer1']
         })).toEqual({
             type: 'UPDATE_EXPORT_INFO',
@@ -72,7 +77,7 @@ describe('export actions', () => {
                 projectName: 'projectName', 
                 makePublic: true, 
                 providers: ['provider1'], 
-                area_str: 'area_str', 
+                areaStr: 'areaStr', 
                 layers: ['layer1']
             }
         });
@@ -104,16 +109,30 @@ describe('export actions', () => {
         });
     });
 
-    it('closeDrawer should return type CLOSE_DRAWER', () => {
-        expect(actions.closeDrawer()).toEqual({
-            type: 'CLOSE_DRAWER'
-        });
+    it('closeDrawer should close drawer', () => {
+        const expectedActions = [
+            {type: types.CLOSING_DRAWER},
+            {type: types.CLOSED_DRAWER},
+        ];
+
+        const store = mockStore({drawer: 'open'});
+        return store.dispatch(actions.closeDrawer())
+            .then(() => {
+                expect(store.getActions()).toEqual(expectedActions);
+            });
     });
 
-    it('openDrawer should return type OPEN_DRAWER', () => {
-        expect(actions.openDrawer()).toEqual({
-            type: 'OPEN_DRAWER'
-        });
+    it('openDrawer should open drawer', () => {
+        const expectedActions = [
+            {type: types.OPENING_DRAWER},
+            {type: types.OPENED_DRAWER},
+        ];
+
+        const store = mockStore({drawer: 'closed'});
+        return store.dispatch(actions.openDrawer())
+            .then(() => {
+                expect(store.getActions()).toEqual(expectedActions);
+            });
     });
 
     it('stepperNextDisabled should return MAKE_STEPPER_INACTIVE and false', () => {

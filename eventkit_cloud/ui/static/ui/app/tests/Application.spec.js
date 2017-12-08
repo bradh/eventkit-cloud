@@ -20,6 +20,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import MockAdapter from 'axios-mock-adapter';
+import BaseDialog from "../components/BaseDialog";
 
 describe('Application component', () => {
     injectTapEventPlugin();
@@ -29,7 +30,9 @@ describe('Application component', () => {
             openDrawer: () => {},
             closeDrawer: () => {},
             userData: {},
-            drawerOpen: true,
+            drawer: 'open',
+            userActive: () => {},
+            router: {push: () => {}},
         }
     }
 
@@ -45,6 +48,7 @@ describe('Application component', () => {
         expect(wrapper.find('header')).toHaveLength(1);
         expect(wrapper.find(AppBar)).toHaveLength(1);
         expect(wrapper.find(Drawer)).toHaveLength(1);
+        expect(wrapper.find(BaseDialog)).toHaveLength(2);
         expect(wrapper.find(MenuItem)).toHaveLength(5);
         expect(wrapper.find(MenuItem).at(0).text()).toEqual('DataPack Library');
         expect(wrapper.find(MenuItem).at(0).find(AVLibraryBooks)).toHaveLength(1);
@@ -63,6 +67,33 @@ describe('Application component', () => {
         expect(wrapper.find(MenuItem).at(4).find(Link)).toHaveLength(1);
     });
 
+    it('the menu items should call handleMouseOver with the route name', () => {
+        const props = getProps();
+        const handleSpy = new sinon.spy();
+        const wrapper = getWrapper(props);
+        wrapper.instance().handleMouseOver = handleSpy;
+        expect(handleSpy.called).toBe(false);
+        wrapper.find('.qa-Application-Link-exports').simulate('mouseEnter');
+        expect(handleSpy.callCount).toBe(1);
+        expect(handleSpy.calledWith('exports')).toBe(true);
+
+        wrapper.find('.qa-Application-Link-create').simulate('mouseEnter');
+        expect(handleSpy.callCount).toBe(2);
+        expect(handleSpy.calledWith('create')).toBe(true);
+
+        wrapper.find('.qa-Application-Link-about').simulate('mouseEnter');
+        expect(handleSpy.callCount).toBe(3);
+        expect(handleSpy.calledWith('about')).toBe(true);
+
+        wrapper.find('.qa-Application-Link-account').simulate('mouseEnter');
+        expect(handleSpy.callCount).toBe(4);
+        expect(handleSpy.calledWith('account')).toBe(true);
+
+        wrapper.find('.qa-Application-Link-logout').simulate('mouseEnter');
+        expect(handleSpy.callCount).toBe(5);
+        expect(handleSpy.calledWith('logout')).toBe(true);
+    });
+
     it('should call openDrawer when user data is added and window width is >= 1200', () => {
         let props = getProps();
         props.userData = null;
@@ -79,26 +110,53 @@ describe('Application component', () => {
         spy.restore();
     });
 
-    it('should call getConfig on mount', () => {
+    it('should call getConfig and addEventListener on mount', () => {
         const mountSpy = new sinon.spy(Application.prototype, 'componentDidMount');
         const getSpy = new sinon.spy(Application.prototype, 'getConfig');
+        const eventSpy = new sinon.spy(window, 'addEventListener');
         const props = getProps();
         const wrapper = getWrapper();
         expect(mountSpy.calledOnce).toBe(true);
         expect(getSpy.calledOnce).toBe(true);
+        expect(eventSpy.called).toBe(true);
+        expect(eventSpy.calledWith('resize', wrapper.instance().handleResize)).toBe(true);
         mountSpy.restore();
         getSpy.restore();
+        eventSpy.restore();
+    });
+
+    it('should remove event listener on unmount', () => {
+        const unmountSpy = new sinon.spy(Application.prototype, 'componentWillUnmount');
+        const eventSpy = new sinon.spy(window, 'removeEventListener');
+        const props = getProps();
+        const wrapper = getWrapper(props);
+        const resize = wrapper.instance().handleResize;
+        expect(eventSpy.called).toBe(false);
+        wrapper.unmount();
+        expect(eventSpy.called).toBe(true);
+        expect(eventSpy.calledWith('resize', resize)).toBe(true);
+        eventSpy.restore();
+    });
+
+    it('handleResize should call forceUpdate', () => {
+        const updateSpy = new sinon.spy(Application.prototype, 'forceUpdate');
+        const props = getProps();
+        const wrapper = getWrapper(props);
+        expect(updateSpy.called).toBe(false);
+        wrapper.instance().handleResize();
+        expect(updateSpy.calledOnce).toBe(true);
+        updateSpy.restore();
     });
 
     it('handleToggle should open and close the drawer', () => {
         let props = getProps();
         props.openDrawer = new sinon.spy();
         props.closeDrawer = new sinon.spy();
-        props.drawerOpen = true;
+        props.drawer = 'open';
         const wrapper = getWrapper(props);
         wrapper.instance().handleToggle();
         expect(props.closeDrawer.calledOnce).toBe(true);
-        wrapper.setProps({...props, drawerOpen: false});
+        wrapper.setProps({...props, drawer: 'closed'});
         wrapper.instance().handleToggle();
         expect(props.openDrawer.calledOnce).toBe(true);
     });
@@ -146,5 +204,65 @@ describe('Application component', () => {
         expect(stateSpy.called).toBe(true);
         expect(stateSpy.calledWith({config: {LOGIN_DISCLAIMER: 'Test string'}})).toBe(true);
         stateSpy.restore();
+    });
+
+    it('handleMouseOver should set the passed in route as the hovered state', () => {
+        const props = getProps();
+        const stateSpy = new sinon.spy();
+        const wrapper = getWrapper(props);
+        wrapper.instance().setState = stateSpy;
+        expect(stateSpy.called).toBe(false);
+        wrapper.instance().handleMouseOver('test string');
+        expect(stateSpy.calledOnce).toBe(true);
+        expect(stateSpy.calledWith({hovered: 'test string'})).toBe(true);
+    });
+
+    it('handleMouseOut should set the hovered state to an empty string', () => {
+        const props = getProps();
+        const stateSpy = new sinon.spy();
+        const wrapper = getWrapper(props);
+        wrapper.instance().setState = stateSpy;
+        expect(stateSpy.called).toBe(false);
+        wrapper.instance().handleMouseOut();
+        expect(stateSpy.calledOnce).toBe(true);
+        expect(stateSpy.calledWith({hovered: ''})).toBe(true);
+    });
+
+    it('Auto logout warning should show remaining minutes when above one minute', () => {
+        jest.useFakeTimers();
+        const props = getProps();
+        // Set auto logout time to 5 minutes from now.
+        props.autoLogoutAt = new Date(Date.now() + (5 * 60 * 1000));
+        props.autoLogoutWarningAt = new Date(Date.now() - 1000);
+        const wrapper = getWrapper(props);
+        wrapper.instance().startCheckingForAutoLogout();
+        jest.runOnlyPendingTimers();
+        expect(wrapper.state().showAutoLogoutWarningDialog).toBe(true);
+        expect(wrapper.state().autoLogoutWarningText).toContain('5 minutes');
+    });
+
+    it('Auto logout warning should show remaining seconds at one minute or less', () => {
+        jest.useFakeTimers();
+        const props = getProps();
+        // Set auto logout time to 60 seconds from now.
+        props.autoLogoutAt = new Date(Date.now() + (60 * 1000));
+        props.autoLogoutWarningAt = new Date(Date.now() - 1000);
+        const wrapper = getWrapper(props);
+        wrapper.instance().startCheckingForAutoLogout();
+        jest.runOnlyPendingTimers();
+        expect(wrapper.state().showAutoLogoutWarningDialog).toBe(true);
+        expect(wrapper.state().autoLogoutWarningText).toContain('60 seconds');
+    });
+
+    it('Auto logged out alert should show after exceeding auto logout time', () => {
+        jest.useFakeTimers();
+        const props = getProps();
+        // Set auto logout time to 1 second in the past.
+        props.autoLogoutAt = new Date(Date.now() - 1000);
+        props.autoLogoutWarningAt = new Date(Date.now());
+        const wrapper = getWrapper(props);
+        wrapper.instance().startCheckingForAutoLogout();
+        jest.runOnlyPendingTimers();
+        expect(wrapper.state().showAutoLoggedOutDialog).toBe(true);
     });
 });

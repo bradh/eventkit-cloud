@@ -24,17 +24,17 @@ from eventkit_cloud.jobs.models import (
     Job,
     Region,
     RegionMask,
-    ExportProvider,
-    ProviderTask,
+    DataProvider,
+    DataProviderTask,
     License,
     UserLicense
 )
 from eventkit_cloud.tasks.models import (
     ExportRun,
-    ExportTask,
+    ExportTaskRecord,
     ExportTaskException,
     FileProducingTaskResult,
-    ExportProviderTask
+    DataProviderTaskRecord
 )
 from eventkit_cloud.utils.s3 import get_presigned_url
 from rest_framework import serializers
@@ -50,6 +50,49 @@ except ImportError:
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
+
+
+class ProviderTaskSerializer(serializers.ModelSerializer):
+    formats = serializers.SlugRelatedField(
+        many=True,
+        queryset=ExportFormat.objects.all(),
+        slug_field='slug',
+        error_messages={'non_field_errors': _('Select an export format.')}
+    )
+    provider = serializers.CharField()
+
+    class Meta:
+        model = DataProviderTask
+        fields = ('provider', 'formats')
+
+    @staticmethod
+    def create(validated_data, **kwargs):
+        from eventkit_cloud.api.views import get_models
+        """Creates an export DataProviderTask."""
+        format_names = validated_data.pop("formats")
+        format_models = get_models([formats for formats in format_names], ExportFormat, 'slug')
+        provider_model = DataProvider.objects.get(name=validated_data.get("provider"))
+        provider_task = DataProviderTask.objects.create(provider=provider_model)
+        provider_task.formats.add(*format_models)
+        provider_task.save()
+        return provider_task
+
+    @staticmethod
+    def update(instance, validated_data, **kwargs):
+        """Not implemented.
+        :param **kwargs:
+        """
+        raise NotImplementedError
+
+    def validate(self, data, **kwargs):
+        """
+        Validates the data submitted during DataProviderTask creation.
+
+        See api/validators.py for validation code.
+        :param **kwargs:
+        """
+        # selection = validators.validate_licenses(self.context['request'].data, user=self.context['request'].user)
+        return data
 
 
 class ExportTaskResultSerializer(serializers.ModelSerializer):
@@ -87,7 +130,7 @@ class ExportTaskExceptionSerializer(serializers.ModelSerializer):
 
         return str(exc_info[1])
 
-class ExportTaskSerializer(serializers.ModelSerializer):
+class ExportTaskRecordSerializer(serializers.ModelSerializer):
     """Serialize ExportTasks models."""
     result = serializers.SerializerMethodField()
     errors = serializers.SerializerMethodField()
@@ -97,13 +140,13 @@ class ExportTaskSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = ExportTask
+        model = ExportTaskRecord
         fields = (
             'uid', 'url', 'name', 'status', 'progress', 'estimated_finish', 'started_at', 'finished_at', 'duration',
             'result', 'errors', 'display')
 
     def get_result(self, obj):
-        """Serialize the FileProducingTaskResult for this ExportTask."""
+        """Serialize the FileProducingTaskResult for this ExportTaskRecord."""
         try:
             result = obj.result
             serializer = ExportTaskResultSerializer(result, many=False, context=self.context)
@@ -112,7 +155,7 @@ class ExportTaskSerializer(serializers.ModelSerializer):
             return None  # no result yet
 
     def get_errors(self, obj):
-        """Serialize the ExportTaskExceptions for this ExportTask."""
+        """Serialize the ExportTaskExceptions for this ExportTaskRecord."""
         try:
             errors = obj.exceptions
             serializer = ExportTaskExceptionSerializer(errors, many=True, context=self.context)
@@ -121,17 +164,16 @@ class ExportTaskSerializer(serializers.ModelSerializer):
             return None
 
 
-class ExportProviderTaskSerializer(serializers.ModelSerializer):
-    tasks = ExportTaskSerializer(many=True, required=False)
+class DataProviderTaskRecordSerializer(serializers.ModelSerializer):
+    tasks = ExportTaskRecordSerializer(many=True, required=False)
     url = serializers.HyperlinkedIdentityField(
         view_name='api:provider_tasks-detail',
         lookup_field='uid'
     )
 
     class Meta:
-        model = ExportProviderTask
+        model = DataProviderTaskRecord
         fields = ('uid', 'url', 'name', 'started_at', 'finished_at', 'duration', 'tasks', 'status', 'display', 'slug')
-
 
 class SimpleJobSerializer(serializers.Serializer):
     """Return a sub-set of Job model attributes."""
@@ -148,9 +190,11 @@ class SimpleJobSerializer(serializers.Serializer):
         lookup_field='uid'
     )
     extent = serializers.SerializerMethodField()
+    original_selection = serializers.SerializerMethodField(read_only=True)
     # bounds = serializers.SerializerMethodField()
     published = serializers.BooleanField()
     featured = serializers.BooleanField()
+    formats = serializers.SerializerMethodField('get_provider_tasks')
 
     @staticmethod
     def get_uid(obj):
@@ -168,6 +212,25 @@ class SimpleJobSerializer(serializers.Serializer):
         feature['properties'] = {'uid': uid, 'name': name}
         feature['geometry'] = geometry
         return feature
+
+    @staticmethod
+    def get_original_selection(obj):
+        geom_collection = obj.original_selection
+        if not geom_collection:
+            return None
+        feature_collection = OrderedDict()
+        feature_collection['type'] = 'FeatureCollection'
+        feature_collection['features'] = []
+        for geom in geom_collection:
+            geojson_geom = json.loads(geom.geojson)
+            feature = OrderedDict()
+            feature['type'] = 'Feature'
+            feature['geometry'] = geojson_geom
+            feature_collection['features'].append(feature)
+        return feature_collection
+
+    def get_provider_tasks(self, obj):
+        return [format.name for format in obj.provider_tasks.first().formats.all()]
 
 
 class LicenseSerializer(serializers.ModelSerializer):
@@ -187,7 +250,7 @@ class ExportRunSerializer(serializers.ModelSerializer):
         lookup_field='uid'
     )
     job = SimpleJobSerializer()  # nest the job details
-    provider_tasks = ExportProviderTaskSerializer(many=True)
+    provider_tasks = DataProviderTaskRecordSerializer(many=True)
     user = serializers.SerializerMethodField()
     zipfile_url = serializers.SerializerMethodField()
     expiration = serializers.SerializerMethodField
@@ -356,7 +419,7 @@ class ExportFormatSerializer(serializers.ModelSerializer):
         fields = ('uid', 'url', 'slug', 'name', 'description')
 
 
-class ExportProviderSerializer(serializers.ModelSerializer):
+class DataProviderSerializer(serializers.ModelSerializer):
     model_url = serializers.HyperlinkedIdentityField(
         view_name='api:providers-detail',
         lookup_field='slug'
@@ -365,7 +428,7 @@ class ExportProviderSerializer(serializers.ModelSerializer):
     license = LicenseSerializer(required=False)
 
     class Meta:
-        model = ExportProvider
+        model = DataProvider
         extra_kwargs = {'url': {'write_only': True}, 'user': {'write_only': True}, 'config': {'write_only': True}}
         read_only_fields = ('uid',)
         fields = '__all__'
@@ -379,9 +442,9 @@ class ExportProviderSerializer(serializers.ModelSerializer):
         if license_data:
             License.objects.create(**license_data)
 
-        ep = ExportProvider.objects.filter(url=url, user=user).first()
+        ep = DataProvider.objects.filter(url=url, user=user).first()
         if not ep:
-            ep = ExportProvider.objects.create(**validated_data)
+            ep = DataProvider.objects.create(**validated_data)
         return ep
 
     @staticmethod
@@ -413,6 +476,7 @@ class ListJobSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     owner = serializers.SerializerMethodField(read_only=True)
     extent = serializers.SerializerMethodField()
+    original_selection = serializers.SerializerMethodField(read_only=True)
     region = SimpleRegionSerializer(read_only=True)
     published = serializers.BooleanField()
     featured  = serializers.BooleanField()
@@ -436,51 +500,24 @@ class ListJobSerializer(serializers.Serializer):
         return feature
 
     @staticmethod
+    def get_original_selection(obj):
+        geom_collection = obj.original_selection
+        if not geom_collection:
+            return None
+        feature_collection = OrderedDict()
+        feature_collection['type'] = 'FeatureCollection'
+        feature_collection['features'] = []
+        for geom in geom_collection:
+            geojson_geom = json.loads(geom.geojson)
+            feature = OrderedDict()
+            feature['type'] = 'Feature'
+            feature['geometry'] = geojson_geom
+            feature_collection['features'].append(feature)
+        return feature_collection
+
+    @staticmethod
     def get_owner(obj):
         return obj.user.username
-
-
-class ProviderTaskSerializer(serializers.ModelSerializer):
-    formats = serializers.SlugRelatedField(
-        many=True,
-        queryset=ExportFormat.objects.all(),
-        slug_field='slug',
-        error_messages={'non_field_errors': _('Select an export format.')}
-    )
-    provider = serializers.CharField()
-
-    class Meta:
-        model = ProviderTask
-        fields = ('provider', 'formats')
-
-    @staticmethod
-    def create(validated_data, **kwargs):
-        from eventkit_cloud.api.views import get_models
-        """Creates an export ProviderTask."""
-        format_names = validated_data.pop("formats")
-        format_models = get_models([formats for formats in format_names], ExportFormat, 'slug')
-        provider_model = ExportProvider.objects.get(name=validated_data.get("provider"))
-        provider_task = ProviderTask.objects.create(provider=provider_model)
-        provider_task.formats.add(*format_models)
-        provider_task.save()
-        return provider_task
-
-    @staticmethod
-    def update(instance, validated_data, **kwargs):
-        """Not implemented.
-        :param **kwargs:
-        """
-        raise NotImplementedError
-
-    def validate(self, data, **kwargs):
-        """
-        Validates the data submitted during ProviderTask creation.
-
-        See api/validators.py for validation code.
-        :param **kwargs:
-        """
-        # selection = validators.validate_licenses(self.context['request'].data, user=self.context['request'].user)
-        return data
 
 
 class JobSerializer(serializers.Serializer):
@@ -517,6 +554,7 @@ class JobSerializer(serializers.Serializer):
     featured = serializers.BooleanField(required=False)
     region = SimpleRegionSerializer(read_only=True)
     extent = serializers.SerializerMethodField(read_only=True)
+    original_selection = serializers.SerializerMethodField(read_only=True)
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
@@ -553,6 +591,8 @@ class JobSerializer(serializers.Serializer):
         user = data['user']
         selection = validators.validate_selection(self.context['request'].data, user=user)
         data['the_geom'] = selection
+        original_selection = validators.validate_original_selection(self.context['request'].data)
+        data['original_selection'] = original_selection
         data.pop('provider_tasks')
 
         return data
@@ -569,6 +609,22 @@ class JobSerializer(serializers.Serializer):
         feature['properties'] = {'uid': uid, 'name': name}
         feature['geometry'] = geometry
         return feature
+
+    @staticmethod
+    def get_original_selection(obj):
+        geom_collection = obj.original_selection
+        if not geom_collection:
+            return None
+        feature_collection = OrderedDict()
+        feature_collection['type'] = 'FeatureCollection'
+        feature_collection['features'] = []
+        for geom in geom_collection:
+            geojson_geom = json.loads(geom.geojson)
+            feature = OrderedDict()
+            feature['type'] = 'Feature'
+            feature['geometry'] = geojson_geom
+            feature_collection['features'].append(feature)
+        return feature_collection
 
     def get_exports(self, obj):
         """Return the export formats selected for this export."""
@@ -591,7 +647,7 @@ class JobSerializer(serializers.Serializer):
     def get_providers(self, obj):
         """Return the export formats selected for this export."""
         providers = [provider_format for provider_format in obj.providers.all()]
-        serializer = ExportProviderSerializer(providers, many=True, context={'request': self.context['request']})
+        serializer = DataProviderSerializer(providers, many=True, context={'request': self.context['request']})
         return serializer.data
 
     @staticmethod

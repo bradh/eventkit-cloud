@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import json
+import tempfile
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
 from django.test import Client
@@ -45,6 +46,48 @@ class TestUIViews(TestCase):
             })
 
 
+    @patch('eventkit_cloud.ui.views.file_to_geojson')
+    def test_covert_to_geojson(self, file_to_geojson):
+        geojson = {
+          "type": "FeatureCollection",
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                  [
+                    [7.2, 46.2],
+                    [7.6, 46.2],
+                    [7.6, 46.6],
+                    [7.2, 46.6],
+                    [7.2, 46.2]
+                  ]
+                ]
+              }
+            }
+          ]
+        }
+        file_to_geojson.return_value = geojson
+        response = self.client.post('/file_upload')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, 'No file supplied in the POST request')
+
+        with tempfile.TemporaryFile() as fp:
+            response = self.client.post('/file_upload',
+                                        {'file': fp})
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.content, json.dumps(geojson))
+
+        file_to_geojson.side_effect = Exception('This is the message')
+        with tempfile.TemporaryFile() as fp:
+            response = self.client.post('/file_upload',
+                                        {'file': fp})
+            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.content, 'This is the message')
+
+
     @patch('eventkit_cloud.ui.views.get_size_estimate')
     def test_data_estimate_view(self, get_estimate):
 
@@ -72,9 +115,18 @@ class TestUIViews(TestCase):
         self.assertEquals(response.status_code, 200)
         self.assertEquals(json.loads(response.content), expected_result)
 
+        expected_result = {"something-else": "value", "bbox": [1, 1, 1, 1]}
+        # test result
+        geocode.add_bbox.return_value = expected_result
+        mock_geocode.return_value = geocode
+        response = self.client.get('/geocode', {"result": '{"something-else": "value"}'})
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(json.loads(response.content), expected_result)
+
         expected_result = None
         # test result
         geocode.search.return_value = expected_result
         mock_geocode.return_value = geocode
-        response = self.client.get('/geocode', {'search': 'some_search'})
+        response = self.client.get('/geocode', {'wrong-key': 'value'})
         self.assertEquals(response.status_code, 204)
+

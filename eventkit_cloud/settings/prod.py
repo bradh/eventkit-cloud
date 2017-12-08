@@ -6,6 +6,7 @@ import dj_database_url
 import os
 import logging
 import json
+import urllib
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -43,9 +44,7 @@ if os.getenv("VCAP_SERVICES"):
             try:
                 EXPORT_STAGING_ROOT = os.path.join(listings[0]['volume_mounts'][0]['container_dir'], 'eventkit_stage')
             except (KeyError, TypeError) as e:
-                import sys
                 print(e)
-                sys.stdout.flush()
                 continue
 if not EXPORT_STAGING_ROOT:
     EXPORT_STAGING_ROOT = os.getenv('EXPORT_STAGING_ROOT', '/var/lib/eventkit/exports_stage/')
@@ -61,6 +60,7 @@ EXPORT_MEDIA_ROOT = os.getenv('EXPORT_MEDIA_ROOT', '/downloads/')
 OVERPASS_API_URL = os.getenv('OVERPASS_API_URL', 'http://overpass-api.de/api/interpreter')
 GEOCODING_API_URL = os.getenv('GEOCODING_API_URL', 'http://api.geonames.org/searchJSON')
 GEOCODING_API_TYPE = os.getenv('GEOCODING_API_TYPE', 'GEONAMES')
+GEOCODING_UPDATE_URL = os.getenv('GEOCODING_UPDATE_URL', None)
 
 """
 Maximum extent of a Job
@@ -90,10 +90,10 @@ SITE_ID = 1
 Admin email address
 which receives task error notifications.
 """
-TASK_ERROR_EMAIL = 'eventkit.team@gmail.com'
-DEFAULT_FROM_EMAIL = 'Eventkit Team <eventkit.team@gmail.com>'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+TASK_ERROR_EMAIL = os.getenv('TASK_ERROR_EMAIL', 'eventkit.team@gmail.com')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Eventkit Team <eventkit.team@gmail.com>')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'eventkit.team@gmail.com')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', None)
 
@@ -102,8 +102,10 @@ if EMAIL_HOST_PASSWORD:
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-
-EMAIL_USE_TLS = True
+if 'f' in os.getenv('EMAIL_USE_TLS', '').lower():
+    EMAIL_USE_TLS = False
+else:
+    EMAIL_USE_TLS = True
 
 """
 Overpass Element limit
@@ -201,8 +203,8 @@ MIDDLEWARE += ['audit_logging.middleware.UserDetailsMiddleware']
 
 AUDIT_MODELS = [
     ('eventkit_cloud.tasks.models.ExportRun', 'ExportRun'),
-    ('eventkit_cloud.tasks.models.ExportProviderTask', 'ExportProviderTask'),
-    ('eventkit_cloud.tasks.models.ExportTask', 'ExportTask'),
+    ('eventkit_cloud.tasks.models.DataProviderTaskRecord', 'DataProviderTaskRecord'),
+    ('eventkit_cloud.tasks.models.ExportTaskRecord', 'ExportTaskRecord'),
 ]
 
 DATABASES = {}
@@ -213,13 +215,12 @@ if os.environ.get('VCAP_SERVICES'):
     if not DATABASES:
         for service, listings in json.loads(os.environ.get('VCAP_SERVICES')).iteritems():
             try:
-                if 'pg_95' in service:
+                if ('pg_95' in service) or ('postgres' in service):
                     DATABASES['default'] = dj_database_url.config(default=listings[0]['credentials']['uri'])
                     DATABASES['default']['CONN_MAX_AGE'] = 500
             except (KeyError, TypeError) as e:
                 print("Could not configure information for service: {0}".format(service))
                 print(e)
-                sys.stdout.flush()
                 continue
             if DATABASES:
                 break
@@ -231,7 +232,7 @@ DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
 DATABASES['default']['OPTIONS'] = {'options': '-c search_path=exports,public'}
 
 if os.getenv("FEATURE_DATABASE_URL"):
-    DATABASES['feature_data'] = dj_database_url.config(default=os.getenv("FEATURE_DATABASE_URL"))
+    DATABASES['feature_data'] = dj_database_url.parse(os.getenv("FEATURE_DATABASE_URL"))
 else:
     DATABASES['feature_data'] = DATABASES['default']
 
@@ -273,6 +274,7 @@ SESSION_COOKIE_NAME = 'eventkit_exports_sessionid'
 SESSION_COOKIE_DOMAIN = os.environ.get('SESSION_COOKIE_DOMAIN', SITE_NAME)
 SESSION_COOKIE_PATH = '/'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_USER_LAST_ACTIVE_AT = 'user_last_active_at'
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 STATIC_URL = '/static/'
@@ -293,9 +295,20 @@ if os.environ.get('USE_S3'):
 else:
     USE_S3 = False
 
-AWS_BUCKET_NAME = os.environ.get('AWS_BUCKET_NAME')
-AWS_ACCESS_KEY = os.environ.get('AWS_ACCESS_KEY')
-AWS_SECRET_KEY = os.environ.get('AWS_SECRET_KEY')
+AWS_BUCKET_NAME = AWS_ACCESS_KEY = AWS_SECRET_KEY = None
+if os.getenv("VCAP_SERVICES"):
+    for service, listings in json.loads(os.getenv("VCAP_SERVICES")).iteritems():
+        if 's3' in service.lower():
+            try:
+                AWS_BUCKET_NAME = listings[0]['credentials']['bucket']
+                AWS_ACCESS_KEY = listings[0]['credentials']['access_key_id']
+                AWS_SECRET_KEY = listings[0]['credentials']['secret_access_key']
+            except (KeyError, TypeError) as e:
+                continue
+AWS_BUCKET_NAME = AWS_BUCKET_NAME or os.environ.get('AWS_BUCKET_NAME')
+AWS_ACCESS_KEY = AWS_ACCESS_KEY or os.environ.get('AWS_ACCESS_KEY')
+AWS_SECRET_KEY = AWS_SECRET_KEY or os.environ.get('AWS_SECRET_KEY')
+
 
 MAPPROXY_CONCURRENCY = os.environ.get('MAPPROXY_CONCURRENCY', 1)
 
@@ -331,3 +344,10 @@ DISABLE_SSL_VERIFICATION = os.environ.get('DISABLE_SSL_VERIFICATION', False)
 MAX_EXPORTRUN_EXPIRATION_DAYS = os.environ.get('MAX_EXPORTRUN_EXPIRATION_DAYS', 30)
 
 LAND_DATA_URL = os.environ.get('LAND_DATA_URL', "http://data.openstreetmapdata.com/land-polygons-split-3857.zip")
+
+AUTO_LOGOUT_COOKIE_NAME = 'eventkit_auto_logout'
+
+AUTO_LOGOUT_SECONDS = int(os.getenv('AUTO_LOGOUT_SECONDS', 0))
+AUTO_LOGOUT_WARNING_AT_SECONDS_LEFT = int(os.getenv('AUTO_LOGOUT_WARNING_AT_SECONDS_LEFT', 5 * 60))
+if AUTO_LOGOUT_SECONDS:
+    MIDDLEWARE += ['eventkit_cloud.auth.auth.auto_logout']

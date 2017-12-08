@@ -1,19 +1,31 @@
-import React from 'react'
+import React from 'react';
 import sinon from 'sinon';
-import {mount} from 'enzyme'
+import raf from 'raf';
+import { mount } from 'enzyme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import injectTapEventPlugin from 'react-tap-event-plugin';
-import ol from 'openlayers';
-import {ExportSummary} from '../../components/CreateDataPack/ExportSummary';
-import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
+import { Card, CardHeader, CardText } from 'material-ui/Card';
+
+import Map from 'ol/map';
+import View from 'ol/view';
+import interaction from 'ol/interaction';
+import VectorSource from 'ol/source/vector';
+import XYZ from 'ol/source/xyz';
+import GeoJSON from 'ol/format/geojson';
+import VectorLayer from 'ol/layer/vector';
+import Tile from 'ol/layer/tile';
+import ScaleLine from 'ol/control/scaleline';
+import Attribution from 'ol/control/attribution';
+import Zoom from 'ol/control/zoom';
+
+import { ExportSummary } from '../../components/CreateDataPack/ExportSummary';
 import CustomScrollbar from '../../components/CustomScrollbar';
-import Paper from 'material-ui/Paper';
+
 
 // this polyfills requestAnimationFrame in the test browser, required for ol3
-import raf from 'raf';
 raf.polyfill();
 
-describe('Export Summary Component', () => { 
+describe('Export Summary Component', () => {
     const muiTheme = getMuiTheme();
     injectTapEventPlugin();
     const getProps = () => {
@@ -34,23 +46,39 @@ describe('Export Summary Component', () => {
             projectName: 'project',
             makePublic: true,
             providers: [
-                {name: 'one', uid: 1, display: true}, 
-                {name: 'two', uid: 2, display: false}, 
-                {name: 'three', uid: 3, display: false}
+                { name: 'one', uid: 1, display: true }, 
+                { name: 'two', uid: 2, display: false }, 
+                { name: 'three', uid: 3, display: false },
             ],
-            area_str: '12 sq km',
-            layers: 'Geopackage'
+            areaStr: '12 sq km',
+            formats: 'gpkg',
+            allFormats: [
+                {
+                    "uid": "ed48a7c1-1fc3-463e-93b3-e93eb3861a5a",
+                    "url": "http://cloud.eventkit.dev/api/formats/shp",
+                    "slug": "shp",
+                    "name": "ESRI Shapefile Format",
+                    "description": "Esri Shapefile (OSM Schema)"
+                },
+                {
+                    "uid": "978ab89c-caf7-4296-9a0c-836fc679ea07",
+                    "url": "http://cloud.eventkit.dev/api/formats/gpkg",
+                    "slug": "gpkg",
+                    "name": "Geopackage",
+                    "description": "GeoPackage"
+                },
+            ],
         }
     }
 
     const getWrapper = (props) => {
-        const config = {BASEMAP_URL: 'http://my-osm-tile-service/{z}/{x}/{y}.png'};        
-        return mount(<ExportSummary {...props}/>, {
-            context: {muiTheme, config},
+        const config = { BASEMAP_URL: 'http://my-osm-tile-service/{z}/{x}/{y}.png' };        
+        return mount(<ExportSummary {...props} />, {
+            context: { muiTheme, config },
             childContextTypes: {
                 muiTheme: React.PropTypes.object,
-                config: React.PropTypes.object
-            }
+                config: React.PropTypes.object,
+            },
         });
     }
 
@@ -88,58 +116,40 @@ describe('Export Summary Component', () => {
     it('should call initializeOpenLayers  when card is expanded', () => {
         const props = getProps();
         const wrapper = getWrapper(props);
-        wrapper.instance()._initializeOpenLayers = new sinon.spy();
-        expect(wrapper.instance()._initializeOpenLayers.called).toBe(false);
-        wrapper.setState({expanded: true});
-        expect(wrapper.instance()._initializeOpenLayers.calledOnce).toBe(true);
-        wrapper.setState({expanded: false});
-        expect(wrapper.instance()._initializeOpenLayers.calledOnce).toBe(true);
+        wrapper.instance().initializeOpenLayers = sinon.spy();
+        expect(wrapper.instance().initializeOpenLayers.called).toBe(false);
+        wrapper.setState({ expanded: true });
+        expect(wrapper.instance().initializeOpenLayers.calledOnce).toBe(true);
+        wrapper.setState({ expanded: false });
+        expect(wrapper.instance().initializeOpenLayers.calledOnce).toBe(true);
     });
 
     it('expandedChange should call setState', () => {
         const props = getProps();
-        const stateSpy = new sinon.spy(ExportSummary.prototype, 'setState');
+        const stateSpy = sinon.spy(ExportSummary.prototype, 'setState');
         const wrapper = getWrapper(props);
         expect(stateSpy.called).toBe(false);
         wrapper.instance().expandedChange(true);
         expect(stateSpy.calledOnce).toBe(true);
-        expect(stateSpy.calledWith({expanded: true})).toBe(true);
+        expect(stateSpy.calledWith({ expanded: true })).toBe(true);
         stateSpy.restore();
     });
 
-    it('componentDidMount should create an eventlistener', () => {
+    it('initializeOpenLayers should read a geojson and display it on the map', () => {
         const props = getProps();
-        const mountSpy = new sinon.spy(ExportSummary.prototype, 'componentDidMount');
-        const listenerSpy = new sinon.spy(window, 'addEventListener');
         const wrapper = getWrapper(props);
-        expect(mountSpy.calledOnce).toBe(true);
-        expect(listenerSpy.calledOnce).toBe(true);
-        expect(listenerSpy.calledWith('resize', wrapper.instance().screenSizeUpdate)).toBe(true);
-        mountSpy.restore();
-        listenerSpy.restore();
-    });
-
-    it('componentWillUnmount should remove the listener', () => {
-        const props = getProps();
-        const unmountSpy = new sinon.spy(ExportSummary.prototype, 'componentWillUnmount');
-        const listenerSpy = new sinon.spy(window, 'removeEventListener');
-        const wrapper = getWrapper(props);
-        const func = wrapper.instance().screenSizeUpdate;
-        wrapper.unmount();
-        expect(unmountSpy.calledOnce).toBe(true);
-        expect(listenerSpy.calledOnce).toBe(true);
-        expect(listenerSpy.calledWith('resize', func)).toBe(true);
-        unmountSpy.restore();
-        listenerSpy.restore();
-    });
-
-    it('screenSizeUpdate should call force update', () => {
-        const props = getProps();
-        const updateSpy = new sinon.spy(ExportSummary.prototype, 'forceUpdate');
-        const wrapper = getWrapper(props);
-        expect(updateSpy.called).toBe(false);
-        wrapper.instance().screenSizeUpdate();
-        expect(updateSpy.calledOnce).toBe(true);
-        updateSpy.restore();
+        const readerSpy = sinon.spy(GeoJSON.prototype, 'readFeatures');
+        const addFeatSpy = sinon.spy(VectorSource.prototype, 'addFeatures');
+        const addLayerSpy = sinon.spy(Map.prototype, 'addLayer');
+        const getViewSpy = sinon.spy(Map.prototype, 'getView');
+        const getExtentSpy = sinon.spy(VectorSource.prototype, 'getExtent');
+        const getSizeSpy = sinon.spy(Map.prototype, 'getSize');
+        wrapper.instance().initializeOpenLayers();
+        expect(readerSpy.calledOnce).toBe(true);
+        expect(addFeatSpy.calledOnce).toBe(true);
+        expect(addLayerSpy.calledOnce).toBe(true);
+        expect(getViewSpy.calledTwice).toBe(true);
+        expect(getExtentSpy.calledOnce).toBe(true);
+        expect(getSizeSpy.calledOnce).toBe(true);
     });
 });

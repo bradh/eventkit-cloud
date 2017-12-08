@@ -1,10 +1,10 @@
-import { initialState as userInitialState } from './userReducer'
-import { initialState as authInitialState } from './userReducer'
+import { initialState as authInitialState } from './userReducer';
 
 export default {
     auth: authInitialState,
     aoiInfo: {
         geojson: {},
+        originalGeojson: {},
         geomType: null,
         title: null,
         description: null,
@@ -16,14 +16,14 @@ export default {
         data: [],
         error: null,
     },
-    user: userInitialState,
+    user: authInitialState,
     importGeom: {
         processing: false,
         processed: false,
-        geom: {},
+        featureCollection: {},
         error: null,
     },
-    drawerOpen: false,
+    drawer: 'closed',
     runsList: {
         fetching: false,
         fetched: false,
@@ -51,12 +51,11 @@ export default {
         projectName: '',
         makePublic: false,
         providers: [],
-        area_str: '',
-        layers: 'Geopackage',
+        areaStr: '',
+        formats: [],
     },
     providers: [],
     stepperNextEnabled: false,
-    datacartDetailsReceived:false,
     datacartDetails: {
         fetching: false,
         fetched: false,
@@ -78,7 +77,7 @@ export default {
         fetching: false,
         fetched: false,
         licenses: [],
-        error: null
+        error: null,
     },
     cancelProviderTask: {
         canceling: false,
@@ -94,5 +93,6 @@ export default {
         updating: false,
         updated: false,
         error: null,
-    }
-}
+    },
+    formats: [],
+};

@@ -2,21 +2,35 @@ import * as reducers from '../../reducers/exportsReducer'
 
 describe('drawerMenu Reducer', () => {
     it('should return initial state', () => {
-        expect(reducers.drawerMenuReducer(undefined, {})).toEqual(false);
+        expect(reducers.drawerMenuReducer(undefined, {})).toEqual('closed');
     });
 
-    it('should handle OPEN_DRAWER', () => {
+    it('should handle OPENING_DRAWER', () => {
         expect(reducers.drawerMenuReducer(
-            false,
-            {type: 'OPEN_DRAWER'}
-        )).toEqual(true);
+            'closed',
+            {type: 'OPENING_DRAWER'}
+        )).toEqual('opening');
     });
-    
-    it('should handle CLOSE_DRAWER', () => {
+
+    it('should handle OPENED_DRAWER', () => {
         expect(reducers.drawerMenuReducer(
-            true,
-            {type: 'CLOSE_DRAWER'}
-        )).toEqual(false);
+            'opening',
+            {type: 'OPENED_DRAWER'}
+        )).toEqual('open');
+    });
+
+    it('should handle CLOSING_DRAWER', () => {
+        expect(reducers.drawerMenuReducer(
+            'open',
+            {type: 'CLOSING_DRAWER'}
+        )).toEqual('closing');
+    });
+
+    it('should handle CLOSED_DRAWER', () => {
+        expect(reducers.drawerMenuReducer(
+            'closing',
+            {type: 'CLOSED_DRAWER'}
+        )).toEqual('closed');
     });
 });
 
@@ -56,30 +70,52 @@ describe('exportAoiInfo reducer', () => {
     }
 
     it('should return initial state', () => {
-        expect(reducers.exportAoiInfoReducer(undefined, {})).toEqual({geojson: {}, geomType: null, title: null, description:null, selectionType: null})
+        expect(reducers.exportAoiInfoReducer(undefined, {})).toEqual({
+            geojson: {},
+            originalGeojson: {},
+            geomType: null,
+            title: null,
+            description: null,
+            selectionType: null,
+        });
     });
 
     it('should handle UPDATE_AOI_INFO', () => {
         expect(reducers.exportAoiInfoReducer(
             {},
-            {type: 'UPDATE_AOI_INFO', geojson: geojson, geomType: 'Polygon', title: 'title', description: 'description', selectionType: 'type'}
-        )).toEqual({geojson: geojson, geomType: 'Polygon', title: 'title', description: 'description', selectionType: 'type'});
+            {
+                type: 'UPDATE_AOI_INFO',
+                geojson,
+                geomType: 'Polygon',
+                title: 'title',
+                description: 'description',
+                selectionType: 'type',
+            },
+        )).toEqual({
+            geojson,
+            geomType: 'Polygon',
+            title: 'title',
+            description: 'description',
+            selectionType: 'type',
+        });
     });
 
     it('should handle CLEAR_AOI_INFO', () => {
         expect(reducers.exportAoiInfoReducer(
             {
-                geojson: geojson,
+                geojson,
                 geomType: 'Polygon',
                 title: 'test',
-                description: 'test stuff'
+                description: 'test stuff',
             },
-            {type: 'CLEAR_AOI_INFO'}
+            { type: 'CLEAR_AOI_INFO' },
         )).toEqual({
             geojson: {},
+            originalGeojson: {},
             geomType: null,
             title: null,
-            description: null
+            description: null,
+            selectionType: null,
         });
     });
 });
@@ -92,8 +128,8 @@ describe('exportInfo reducer', () => {
             projectName: '',
             makePublic: false,
             providers: [],
-            area_str: '',
-            layers: 'Geopackage'
+            areaStr: '',
+            formats: [],
         });
     });
 
@@ -105,8 +141,8 @@ describe('exportInfo reducer', () => {
                 projectName: '',
                 makePublic: false,
                 providers: [],
-                area_str: '',
-                layers: ''
+                areaStr: '',
+                layers: '',
             },
             {
                 type: 'UPDATE_EXPORT_INFO',
@@ -116,18 +152,18 @@ describe('exportInfo reducer', () => {
                     projectName: 'project',
                     makePublic: true,
                     providers: ['provider'],
-                    area_str: 'string',
-                    layers: 'layer'
-                }
-            }
+                    areaStr: 'string',
+                    layers: 'layer',
+                },
+            },
         )).toEqual({
             exportName: 'name',
             datapackDescription: 'description',
             projectName: 'project',
             makePublic: true,
             providers: ['provider'],
-            area_str: 'string',
-            layers: 'layer'
+            areaStr: 'string',
+            layers: 'layer',
         });
     });
 
@@ -139,21 +175,19 @@ describe('exportInfo reducer', () => {
                 projectName: 'project',
                 makePublic: true,
                 providers: ['provider'],
-                area_str: 'string',
-                layers: 'layer'
+                areaStr: 'string',
+                layers: 'layer',
             },
-            {type: 'CLEAR_EXPORT_INFO'}
-        )).toEqual(
-            {
-                exportName: '',
-                datapackDescription: '',
-                projectName: '',
-                makePublic: false,
-                providers: [],
-                area_str: '',
-                layers: ''
-            }
-        )
+            { type: 'CLEAR_EXPORT_INFO' },
+        )).toEqual({
+            exportName: '',
+            datapackDescription: '',
+            projectName: '',
+            makePublic: false,
+            providers: [],
+            areaStr: '',
+            layers: '',
+        });
     });
 });
 
@@ -165,7 +199,7 @@ describe('getProvidersReducer', () => {
     it('should handle GETTING_PROVIDERS', () => {
         expect(reducers.getProvidersReducer(
             ['one', 'two', 'three'],
-            {type: 'GETTING_PROVIDERS'}
+            { type: 'GETTING_PROVIDERS' },
         )).toEqual([]);
     });
 

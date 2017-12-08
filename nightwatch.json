@@ -1,0 +1,54 @@
+{
+  "src_folders" : ["eventkit_cloud/ui/static/ui/app/tests/e2e/tests", "eventkit_cloud/ui/static/ui/app/tests/e2e/snaptests/tests"],
+  "output_folder" : "e2e_reports",
+  "custom_commands_path" : "",
+  "custom_assertions_path" : "",
+  "page_objects_path" : "",
+  "globals_path" : "",
+
+  "selenium" : {
+    "start_process" : false,
+    "server_path" : "",
+    "log_path" : "e2e_reports",
+    "port" : 4444,
+    "cli_args" : {
+      "webdriver.chrome.driver" : "",
+      "webdriver.gecko.driver" : "",
+      "webdriver.edge.driver" : ""
+    }
+  },
+
+  "test_settings" : {
+    "default" : {
+      "launch_url" : "${E2E_LAUNCH_URL}",
+      "selenium_port"  : 80,
+      "selenium_host"  : "ondemand.saucelabs.com",
+      "silent": true,
+      "username": "${E2E_SAUCELABS_USERNAME}",
+      "access_key": "${E2E_SAUCELABS_ACCESS_KEY}",
+      "screenshots" : {
+        "enabled" : false,
+        "path" : ""
+      },
+      "desiredCapabilities": {
+        "acceptSslCerts": true,
+        "marionette": true,
+        "screenResolution": "1920x1080",
+        "platform": "Windows 10",
+        "browserName": "chrome",
+        "version": "61.0"
+      },
+      "globals": {
+        "waitForConditionTimeout": 10000
+      }
+    },
+
+    "ie-8.0": {
+      "desiredCapabilities": {
+        "platform": "Windows 7",
+        "browserName": "internet explorer",
+        "version": "8.0"
+      }
+    }
+  }
+}

@@ -7,7 +7,6 @@ import Paper from 'material-ui/Paper'
 import CircularProgress from 'material-ui/CircularProgress';
 import { StatusDownload } from '../../components/StatusDownloadPage/StatusDownload';
 import  DataCartDetails from '../../components/StatusDownloadPage/DataCartDetails';
-import '../../components/tap_events'
 import CustomScrollbar from '../../components/CustomScrollbar';
 import TimerMixin from 'react-timer-mixin';
 import {browserHistory} from 'react-router';
@@ -151,7 +150,10 @@ describe('StatusDownload component', () => {
                     }
                 },
                 "selection": "",
-                "published": false
+                "published": false,
+                "formats": [
+                    "Geopackage"
+                ]
             },
             "provider_tasks": providerTasks,
             "zipfile_url": "http://cloud.eventkit.dev/downloads/6870234f-d876-467c-a332-65fdf0399a0d/TestGPKG-WMTS-TestProject-eventkit-20170310.zip",
@@ -207,7 +209,10 @@ describe('StatusDownload component', () => {
                     }
                 },
                 "selection": "",
-                "published": false
+                "published": false,
+                "formats": [
+                    "Geopackage"
+                ]
             },
             "provider_tasks": providerTasksRunning,
             "zipfile_url": "http://cloud.eventkit.dev/downloads/6870234f-d876-467c-a332-65fdf0399a0d/TestGPKG-WMTS-TestProject-eventkit-20170310.zip",
@@ -340,43 +345,34 @@ describe('StatusDownload component', () => {
         expect(wrapper.find(CircularProgress)).toHaveLength(1);
     });
 
-    it('should call getDatacartDetails, getProviders, startTimer, setMaxDays state and addEventListener when mounted', () => {
+    it('should call getDatacartDetails, getProviders, startTimer, and setMaxDays state when mounted', () => {
         let props = getProps();
         props.getDatacartDetails = new sinon.spy();
         props.getProviders = new sinon.spy();
         let startTimerSpy = new sinon.spy(StatusDownload.prototype, 'startTimer');
         const mountSpy = new sinon.spy(StatusDownload.prototype, 'componentDidMount');
         const stateSpy = new sinon.spy(StatusDownload.prototype, 'setState');
-        const eventSpy = new sinon.spy(window, 'addEventListener');
         const wrapper = getWrapper(props);
         expect(mountSpy.calledOnce).toBe(true);
         expect(props.getDatacartDetails.calledOnce).toBe(true);
         expect(props.getDatacartDetails.calledWith('123456789')).toBe(true);
         expect(props.getProviders.calledOnce).toBe(true);
         expect(startTimerSpy.calledOnce).toBe(true);
-        expect(eventSpy.calledOnce).toBe(true);
-        expect(eventSpy.calledWith('resize', wrapper.instance().handleResize)).toBe(true);
         expect(stateSpy.calledOnce).toBe(true);
         expect(stateSpy.calledWith({maxDays: '30'})).toBe(true);
         startTimerSpy.restore();
         mountSpy.restore();
-        eventSpy.restore();
         stateSpy.restore();
     });
 
-    it('should remove timer and eventlistener before unmounting', () => {
+    it('should remove timer before unmounting', () => {
         const props = getProps();
         const timerSpy = new sinon.spy(TimerMixin, 'clearInterval');
-        const eventSpy = new sinon.spy(window, 'removeEventListener');
         const wrapper = getWrapper(props);
         const timer = wrapper.instance().timer;
-        const resize = wrapper.instance().handleResize;
         wrapper.unmount();
         expect(timerSpy.calledOnce).toBe(true);
         expect(timerSpy.calledWith(timer)).toBe(true);
-        expect(eventSpy.calledOnce).toBe(true);
-        expect(eventSpy.calledWith('resize', resize)).toBe(true);
-        eventSpy.restore();
         timerSpy.restore();
     });
 
@@ -470,15 +466,6 @@ describe('StatusDownload component', () => {
         expect(cloneSpy.calledOnce).toBe(true);
         expect(props.cloneExport.calledOnce).toBe(true);
         cloneSpy.restore();
-    });
-
-    it('screenSizeUpdate should force the component to update', () => {
-        const props = getProps();
-        const wrapper = getWrapper(props);
-        const updateSpy = new sinon.spy(StatusDownload.prototype, 'forceUpdate');
-        wrapper.instance().handleResize();
-        expect(updateSpy.calledOnce).toBe(true);
-        updateSpy.restore();
     });
 
     it('should call componentWillReceiveProps when Expiration is updated', () => {
