@@ -24,7 +24,6 @@ logger = get_task_logger(__name__)
 #     logger.debug('Purging {0} unpublished exports.'.format(count))
 #     expired_jobs.delete()
 
-
 @app.task(name="Create Size Averages")
 def create_size_averages():
     """
@@ -32,15 +31,16 @@ def create_size_averages():
     Adds the new average to the provider model 
     """
     from eventkit_cloud.tasks.models import ExportRun
-    from eventkit_cloud.jobs.models import ExportProvider
+    from eventkit_cloud.jobs.models import DataProvider
     from eventkit_cloud.ui.data_estimator import get_osm_feature_count
 
     logger.debug('Creating size average constants')
-    providers = ExportProvider.objects.all()
+    providers = DataProvider.objects.all()
     for provider in providers:
         # get the last 100 completed runs that contain this provider in the provider tasks
         runs = ExportRun.objects.filter(job__provider_tasks__provider=provider, status='COMPLETED')[:100]
         if not runs:
+            logger.debug('{0} has no runs'.format(provider.slug))
             continue
 
         logger.debug('------------- {0} -------------'.format(provider.slug))
@@ -167,16 +167,16 @@ def get_file_size(run=None, provider_name=None, min_size=0):
         logger.error('Both run and provider name are required to get file size')
         return None
 
-    from eventkit_cloud.tasks.models import ExportTask, ExportProviderTask
+    from eventkit_cloud.tasks.models import ExportTaskRecord, DataProviderTaskRecord
     ignored_tasks = ['Area of Interest (.geojson)', 'Project file (.zip)']
 
-    export_provider_tasks = ExportProviderTask.objects.filter(run=run)
-    for export_provider_task in export_provider_tasks:
+    data_provider_task_records = DataProviderTaskRecord.objects.filter(run=run)
+    for data_provider_task_record in data_provider_task_records:
         # only check export provider tasks that correspond to the provider in question
-        if export_provider_task.name != provider_name:
+        if data_provider_task_record.name != provider_name:
             continue
         # get all the export tasks associated with the export provider task
-        export_tasks = ExportTask.objects.filter(export_provider_task=export_provider_task)
+        export_tasks = ExportTaskRecord.objects.filter(export_provider_task=data_provider_task_record)
         for export_task in export_tasks:
             # ignore zip files and aoi file
             if export_task.name not in ignored_tasks:

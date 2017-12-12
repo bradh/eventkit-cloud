@@ -16,6 +16,10 @@ import ScaleLine from 'ol/control/scaleline';
 import Attribution from 'ol/control/attribution';
 import Zoom from 'ol/control/zoom';
 
+import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader';
+import GeoJSONWriter from 'jsts/org/locationtech/jts/io/GeoJSONWriter';
+import UnionOp from 'jsts/org/locationtech/jts/operation/union/UnionOp';
+
 import { List, ListItem } from 'material-ui/List';
 import { Card, CardHeader, CardText } from 'material-ui/Card';
 import ActionCheckCircle from 'material-ui/svg-icons/action/check-circle';
@@ -39,7 +43,7 @@ export class ExportInfo extends React.Component {
             formatsDialogOpen: false,
             projectionsDialogOpen: false,
             licenseDialogOpen: false,
-            estimates: {}
+            estimates: {},
         };
         this.onNameChange = this.onNameChange.bind(this);
         this.onDescriptionChange = this.onDescriptionChange.bind(this);
@@ -159,34 +163,46 @@ export class ExportInfo extends React.Component {
     }
 
     getSizeEstimates() {
-        const feature = new GeoJSON().readFeature(this.props.geojson.features[0]);
-        const merc_feature = new GeoJSON().readFeature(this.props.geojson.features[0], {
+        const olFeatures = new GeoJSON().readFeatures(this.props.geojson, {
             dataProjection: 'EPSG:4326',
             featureProjection: 'EPSG:3857',
         });
 
-        const area = merc_feature.getGeometry().getArea() * 0.000001;
-        const bbox = feature.getGeometry().getExtent();
+        const reader = new GeoJSONReader();
+        const reprojectedGeojson = new GeoJSON().writeFeaturesObject(olFeatures);
+        const { features } = reader.read(reprojectedGeojson);
+        let area = 0;
+        if (features.length) {
+            let geom = features[0].geometry;
+            for (let i = 1; i < features.length; i += 1) {
+                geom = UnionOp.union(geom, features[i].geometry);
+            }
+            area = geom.getArea() * 0.000001;
+            console.log(area);
+        }
+
         const providers = this.props.providers.filter((provider) => { return provider.display });
         
         providers.forEach((provider) => {
             const state = this.state.estimates;
+            console.log(provider);
+            console.log(state);
             if (provider.slug === 'osm') {
                 const csrfmiddlewaretoken = cookie.load('csrftoken');
                 return axios({
                     url: '/osm_features',
                     method: 'POST',
-                    data: JSON.stringify({ geojson_feature: this.props.geojson.features[0] }),
+                    data: JSON.stringify({ geojson: this.props.geojson }),
                     headers: { "X-CSRFToken": csrfmiddlewaretoken },
                 }).then((response) => {
                     const featureCount = response.data || 0;
-                    console.log(featureCount)
+                    console.log(featureCount);
                     state[provider.name] = provider.size_estimate_constant * featureCount;
-                    this.setState({estimates: state});
+                    this.setState({ estimates: state });
                 });
             } else {
                 const estimate = provider.size_estimate_constant || 0;
-                state[provider.name] = provider.size_estimate_constant * area;
+                state[provider.name] = estimate * area;
                 this.setState({ estimates: state });
             }
         });
@@ -306,11 +322,11 @@ export class ExportInfo extends React.Component {
     }
 
     formatSizeEstimate(size) {
-        if (!size) {
-            return 'Getting estimate';
+        if (size === 0) {
+            return 'Could not get estimate';
         }
-        if(size == 0) {
-            return 'Could not get estimate'
+        if (size === undefined) {
+            return 'Getting estimate';
         }
         return size > 1 ? `${Number(size).toFixed(3)} GB` 
             : size > .001 ? `${Number(size * 1000).toFixed(3)} MB` 

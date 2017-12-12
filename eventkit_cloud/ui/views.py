@@ -189,15 +189,19 @@ def help_presets(request):
 @require_http_methods(['POST'])
 def osm_feature_count(request):
     """
-    :param request: a request with a geojson feature in the body} 
+    :param request: a request with a geojson FeatureCollection in the body} 
     :return: the total feature count
     """
     request_data = json.loads(request.body)
     total = 0
-    feature = request_data.get('geojson_feature')
-    if not feature:
-        return HttpResponse('No feature found in the request', status=400)
-    total = get_osm_feature_count(geojson_geometry=feature['geometry'])
+    collection = request_data.get('geojson')
+    if not collection or not len(collection.get('features')):
+        return HttpResponse('No features found in the request', status=400)
+    total = 0
+    for feature in collection.get('features'):
+        logger.error(feature)
+        print(feature)
+        total += get_osm_feature_count(geojson_geometry=feature['geometry'])
     return HttpResponse([total], status=200)
 
 

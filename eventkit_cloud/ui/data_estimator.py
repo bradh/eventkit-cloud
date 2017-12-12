@@ -5,6 +5,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from string import Template
 from django.conf import settings
 from time import sleep
+from celery.utils.log import get_task_logger
+
+logger = get_task_logger(__name__)
 
 import requests
 import json
@@ -53,11 +56,7 @@ def get_osm_feature_count(geojson_geometry=None):
     :param geojson_geometry: this is a dict representing the geometry of a geojson feature 
     :return: the number of osm features contained in the geometry area
     """
-    if settings.OVERPASS_API_URL:
-        url = settings.OVERPASS_API_URL
-    else:
-        url = 'http://localhost/interpreter'
-    verify_ssl = not getattr(settings, "DISABLE_SSL_VERIFICATION", False)
+
     if not geojson_geometry:
         raise Exception('A geojson geometry is required')
 
@@ -67,15 +66,40 @@ def get_osm_feature_count(geojson_geometry=None):
         except:
             raise Exception('Could not read passed in geojson geometry')
 
+    count = 0
     if geojson_geometry['type'] == 'MultiPolygon':
-        normal_coords = geojson_geometry['coordinates'][0][0]
+        for polygon in geojson_geometry['coordinates']:
+            coords = polygon[0]
+            query_coords = reverse_polygon_lat_lon(coords)
+            query_coords = coord_array_to_string(query_coords)
+
+            count += make_osm_feature_request(query_coords=query_coords)
+
     elif geojson_geometry['type'] == 'Polygon':
-        normal_coords = geojson_geometry['coordinates'][0]
+        coords = geojson_geometry['coordinates'][0]
+        query_coords = reverse_polygon_lat_lon(coords)
+        query_coords = coord_array_to_string(query_coords)
+
+        count += make_osm_feature_request(query_coords=query_coords)
     else:
         raise  Exception('Geometry should be a polygon type')
 
-    query_coords = reverse_polygon_lat_lon(normal_coords)
-    query_coords = coord_array_to_string(query_coords)
+    return count or None
+
+def make_osm_feature_request(query_coords=None):
+    """
+    :param query_coords: this is a dict representing the geometry of a geojson feature 
+    :return: the number of osm features contained in the geometry area
+    """
+
+    if not query_coords:
+        raise Exception('No coordinates supplied')
+
+    if settings.OVERPASS_API_URL:
+        url = settings.OVERPASS_API_URL
+    else:
+        url = 'http://localhost/interpreter'
+    verify_ssl = not getattr(settings, "DISABLE_SSL_VERIFICATION", False)
 
     request_template = Template('[out:json];(node(poly:"$polygon");<;);out count;')
 
@@ -108,7 +132,7 @@ def get_osm_feature_count(geojson_geometry=None):
         count = data['elements'][0]['tags']['total']
     elif 'count' in data['elements'][0]:
         count = data['elements'][0]['count']['total']
-    return count or None
+    return count
 
 def reverse_polygon_lat_lon(coords):
     """

@@ -34,9 +34,9 @@ CELERYBEAT_SCHEDULE = {
         'task': 'Expire Runs',
         'schedule': crontab(minute='0', hour='0', day_of_week='*')
     },
-    'calculate_averages': {
+    'calculate-averages': {
         'task': 'Create Size Averages',
-        'schedule': crontab(minute='0', hour='0', day_of_week='*')
+        'schedule': 120.0
     }
 }
 
