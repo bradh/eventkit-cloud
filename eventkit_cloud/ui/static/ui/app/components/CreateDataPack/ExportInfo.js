@@ -178,15 +178,12 @@ export class ExportInfo extends React.Component {
                 geom = UnionOp.union(geom, features[i].geometry);
             }
             area = geom.getArea() * 0.000001;
-            console.log(area);
         }
 
         const providers = this.props.providers.filter((provider) => { return provider.display });
         
         providers.forEach((provider) => {
             const state = this.state.estimates;
-            console.log(provider);
-            console.log(state);
             if (provider.slug === 'osm') {
                 const csrfmiddlewaretoken = cookie.load('csrftoken');
                 return axios({
@@ -194,9 +191,9 @@ export class ExportInfo extends React.Component {
                     method: 'POST',
                     data: JSON.stringify({ geojson: this.props.geojson }),
                     headers: { "X-CSRFToken": csrfmiddlewaretoken },
+                    timeout: 60 * 1000,
                 }).then((response) => {
                     const featureCount = response.data || 0;
-                    console.log(featureCount);
                     state[provider.name] = provider.size_estimate_constant * featureCount;
                     this.setState({ estimates: state });
                 });

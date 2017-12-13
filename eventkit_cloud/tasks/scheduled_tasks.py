@@ -40,10 +40,10 @@ def create_size_averages():
         # get the last 100 completed runs that contain this provider in the provider tasks
         runs = ExportRun.objects.filter(job__provider_tasks__provider=provider, status='COMPLETED')[:100]
         if not runs:
-            logger.debug('{0} has no runs'.format(provider.slug))
+            logger.info('{0} has no runs'.format(provider.slug))
             continue
 
-        logger.debug('------------- {0} -------------'.format(provider.slug))
+        logger.info('------------- {0} -------------'.format(provider.slug))
         if provider.slug == 'osm':
             gb_per_feature_sum = []
             for run in runs:
@@ -86,7 +86,7 @@ def create_size_averages():
                 total = total/len(gb_per_sq_km_sum)
                 provider.size_estimate_constant = total
                 provider.save()
-    logger.debug('Finished creating size average constants')
+    logger.info('Finished creating size average constants')
 
 
 @app.task(name='Expire Runs')

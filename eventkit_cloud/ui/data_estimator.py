@@ -84,7 +84,7 @@ def get_osm_feature_count(geojson_geometry=None):
     else:
         raise  Exception('Geometry should be a polygon type')
 
-    return count or None
+    return count
 
 def make_osm_feature_request(query_coords=None):
     """
@@ -117,7 +117,7 @@ def make_osm_feature_request(query_coords=None):
         max = 10
         attempts = 0
         while req.status_code == 429 and attempts != max:
-            print("We need to wait and try again")
+            logger.info("We need to wait and try again")
             sleep(15)
             req = requests.post(url, data=query, stream=False, verify=verify_ssl)
             attempts += 1
@@ -125,8 +125,8 @@ def make_osm_feature_request(query_coords=None):
     try:
         data = json.loads(req.content)
     except Exception as e:
-        print('Could not parse response from OSM server')
-        return None
+        logger.error('Could not parse response from OSM server')
+        return 0
     count = 0
     if 'tags' in data['elements'][0]:
         count = data['elements'][0]['tags']['total']

@@ -199,8 +199,6 @@ def osm_feature_count(request):
         return HttpResponse('No features found in the request', status=400)
     total = 0
     for feature in collection.get('features'):
-        logger.error(feature)
-        print(feature)
         total += get_osm_feature_count(geojson_geometry=feature['geometry'])
     return HttpResponse([total], status=200)
 
