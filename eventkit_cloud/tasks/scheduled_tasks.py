@@ -188,7 +188,7 @@ def get_file_size(run=None, provider_name=None, min_size=0):
                         return 0
                     file_size_gb = file_size_mb * 0.001
                     return file_size_gb
-        return 0
+    return 0
 
 def remove_outliers(data_array=[], deviations=2):
     if not len(data_array) > 3:

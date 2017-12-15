@@ -8,9 +8,10 @@ from django.utils import timezone
 from django.conf import settings
 from django.template.loader import get_template
 
-from eventkit_cloud.jobs.models import Job
-from eventkit_cloud.tasks.models import ExportRun
-from eventkit_cloud.tasks.scheduled_tasks import expire_runs, send_warning_email
+from eventkit_cloud.jobs.models import Job, DataProvider, DataProviderTask
+from eventkit_cloud.tasks.models import ExportRun, ExportTaskRecord, DataProviderTaskRecord, FileProducingTaskResult
+from eventkit_cloud.tasks.scheduled_tasks import expire_runs, send_warning_email, \
+    remove_outliers, get_file_size, create_size_averages
 from mock import patch
 
 logger = logging.getLogger(__name__)
@@ -95,6 +96,107 @@ class TestEmailNotifications(TestCase):
         alternatives.assert_called_once_with("Your EventKit DataPack is set to expire.",
                                                  text, to=[addr], from_email='Eventkit Team <eventkit.team@gmail.com>')
         alternatives().send.assert_called_once()
+
+class TestGetFileSize(TestCase):
+    def setUp(self,):
+        Group.objects.create(name='TestExpireRunsTaskGroup')
+        self.user = User.objects.create(username='test', email='test@test.com', password='test')
+        bbox = Polygon.from_bbox((-10.85, 6.25, -10.62, 6.40))
+        self.the_geom = GEOSGeometry(bbox, srid=4326)
+        created_at = timezone.now() - timezone.timedelta(days=7)
+        self.data_provider = DataProvider.objects.create(name='test-provider',
+                                                         slug='test',
+                                                         display=True)
+        self.osm_data_provider = DataProvider.objects.create(name='osm',
+                                                             slug='osm',
+                                                             display=True)
+        self.data_provider_task = DataProviderTask.objects.create(provider=self.data_provider)
+        self.osm_data_provider_task = DataProviderTask.objects.create(provider=self.osm_data_provider)
+        self.job = Job.objects.create(name="TestJob",
+                                      created_at=created_at,
+                                      published=False,
+                                      description='Test description',
+                                      user=self.user,
+                                      the_geom=self.the_geom)
+        self.job.provider_tasks.add(self.data_provider_task, self.osm_data_provider_task)
+        self.run = ExportRun.objects.create(job=self.job, user=self.user, status='COMPLETED')
+
+    @patch('eventkit_cloud.tasks.scheduled_tasks.remove_outliers')
+    @patch('eventkit_cloud.tasks.scheduled_tasks.get_file_size')
+    @patch('eventkit_cloud.ui.data_estimator.get_osm_feature_count')
+    def test_create_size_averages(self, mock_get_count, mock_get_size, mock_remove):
+        mock_get_count.return_value = 400
+        mock_get_size.return_value = 0.6
+        mock_remove.return_value = [0.505]
+        self.assertTrue(True)
+        self.assertEqual(DataProvider.objects.get(name='test-provider').size_estimate_constant, None)
+        self.assertEqual(DataProvider.objects.get(name='osm').size_estimate_constant, None)
+        create_size_averages()
+        self.assertEqual(DataProvider.objects.get(name='test-provider').size_estimate_constant, 0.505)
+        self.assertEqual(DataProvider.objects.get(name='osm').size_estimate_constant, 0.505)
+
+        providers = DataProvider.objects.all()
+        for provider in providers:
+            provider.size_estimate_constant = None
+            provider.save()
+
+        mock_get_count.side_effect = Exception('oh no')
+        mock_remove.return_value = []
+        self.assertEqual(DataProvider.objects.get(name='test-provider').size_estimate_constant, None)
+        self.assertEqual(DataProvider.objects.get(name='osm').size_estimate_constant, None)
+        create_size_averages()
+        self.assertEqual(DataProvider.objects.get(name='test-provider').size_estimate_constant, None)
+        self.assertEqual(DataProvider.objects.get(name='osm').size_estimate_constant, None)
+
+        mock_get_count.side_effect = None
+        mock_remove.return_value = [0.505]
+        ExportRun.objects.all()[0].delete()
+        create_size_averages()
+        self.assertEqual(DataProvider.objects.get(name='test-provider').size_estimate_constant, None)
+        self.assertEqual(DataProvider.objects.get(name='osm').size_estimate_constant, None)
+
+
+    def test_get_file_size(self):
+        task_record = DataProviderTaskRecord.objects.create(name='test-provider',
+                                                            slug='provider',
+                                                            run=self.run)
+        test_result = FileProducingTaskResult.objects.create(size=600)
+        export_task = ExportTaskRecord.objects.create(export_provider_task=task_record,
+                                                      name='Test Export',
+                                                      result=test_result)
+
+        ret = get_file_size(run=self.run)
+        self.assertEqual(ret, None)
+
+        ret = get_file_size(provider_name='test-provider')
+        self.assertEqual(ret, None)
+
+        ret = get_file_size(run=self.run, provider_name='test-provider')
+        self.assertEqual(ret, 600 * 0.001)
+
+        test_result.size = 0
+        test_result.save()
+        ret = get_file_size(run=self.run, provider_name='test-provider')
+        self.assertEqual(ret, 0)
+
+        test_result.size = 50
+        test_result.save()
+        ret = get_file_size(run=self.run, provider_name='test-provider', min_size=51)
+        self.assertEqual(ret, 0)
+
+        ret = get_file_size(run=self.run, provider_name='some-other-provider')
+        self.assertEqual(ret, 0)
+
+    def test_remove_outliers(self):
+        array = [10, 10, 10, 10, 12, 2]
+        expected = [10, 10, 10, 10, 12]
+        output = remove_outliers(array)
+        self.assertEqual(output, expected)
+
+        array = [2, 4, 7]
+        output = remove_outliers(array)
+        self.assertEqual(output, array)
+
 
 
 

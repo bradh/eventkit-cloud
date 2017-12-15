@@ -88,6 +88,36 @@ class TestUIViews(TestCase):
             self.assertEqual(response.content, 'This is the message')
 
 
+    @patch('eventkit_cloud.ui.views.get_osm_feature_count')
+    def test_osm_feature_count(self, mock_get_count):
+        mock_get_count.return_value = 5
+        geojson = {
+            "type": "FeatureCollection",
+            "features": [
+                {"type:": "Feature", "geometry": {}},
+                {"type": "Feature", "geometry": {}}
+            ]
+        }
+        response = self.client.post('/osm_features',
+                                    data=json.dumps({'geojson': geojson}),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(int(response.content), 10)
+        self.assertEqual(mock_get_count.call_count, 2)
+
+        response = self.client.post('/osm_features',
+                                    data=json.dumps({}),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, 'No features found in the request')
+
+        geojson = {"type": "FeatureCollection", "features": []}
+        response = self.client.post('/osm_features',
+                                    data=json.dumps({"geojson": geojson}),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, 'No features found in the request')
+
     @patch('eventkit_cloud.ui.views.get_size_estimate')
     def test_data_estimate_view(self, get_estimate):
 

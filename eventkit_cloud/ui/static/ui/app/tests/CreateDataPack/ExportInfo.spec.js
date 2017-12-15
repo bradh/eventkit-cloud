@@ -8,6 +8,8 @@ import { List, ListItem } from 'material-ui/List';
 import { Card, CardHeader, CardText } from 'material-ui/Card';
 import TextField from 'material-ui/TextField';
 import Checkbox from 'material-ui/Checkbox';
+import MockAdapter from 'axios-mock-adapter';
+import axios from 'axios';
 
 import Map from 'ol/map';
 import View from 'ol/view';
@@ -51,6 +53,7 @@ describe('ExportInfo component', () => {
                 datapackDescription: '',
                 projectName: '',
                 makePublic: false,
+                providers: [],
             },
             providers: [],
             formats,
@@ -248,6 +251,142 @@ describe('ExportInfo component', () => {
             ...props.exportInfo,
             providers: [{ name: 'one' }],
         })).toBe(true);
+    });
+
+    it('getSizeEstimates should set the estimates in the state', () => {
+        const props = getProps();
+        const providers = [
+            { name: 'osm', slug: 'osm', display: true, size_estimate_constant: 0.5 },
+            { name: 'raster', slug: 'raster', display: true, size_estimate_constant: 0.5 },
+        ];
+        const geojson = {
+            type: 'FeatureCollection',
+            features: [{
+                type: 'Feature',
+                geometry: {
+                    type: 'Polygon',
+                    coordinates: [
+                        [
+                            [100.0, 0.0],
+                            [101.0, 0.0],
+                            [101.0, 1.0],
+                            [100.0, 1.0],
+                            [100.0, 0.0],
+                        ],
+                    ],
+                },
+            }, {
+                type: 'Feature',
+                geometry: {
+                    type: 'Polygon',
+                    coordinates: [
+                        [
+                            [101.0, 1.0],
+                            [102.0, 1.0],
+                            [102.0, 2.0],
+                            [101.0, 2.0],
+                            [101.0, 1.0],
+                        ],
+                    ],
+                },
+            }],
+        };
+        props.providers = [...providers];
+        props.geojson = geojson;
+
+
+        const mock = new MockAdapter(axios);
+        mock.onGet('/osm_features').reply(200, 50);
+        const stateSpy = sinon.spy(ExportInfo.prototype, 'setState');
+        const wrapper = getWrapper(props);
+        wrapper.instance().getSizeEstimates();
+        expect(stateSpy.calledWith({ estimates: { raster: 12394.546349270073 } })).toBe(true);
+        stateSpy.restore();
+    });
+
+    it('formatSizeEstimate should return unable to get estimate string', () => {
+        const props = getProps();
+        const wrapper = getWrapper(props);
+        const ret = wrapper.instance().formatSizeEstimate(0);
+        expect(ret).toEqual('Could not get estimate');
+    });
+
+    it('formatSizeEstimate should return getting estimate string', () => {
+        const props = getProps();
+        const wrapper = getWrapper(props);
+        const ret = wrapper.instance().formatSizeEstimate(undefined);
+        expect(ret).toEqual('Getting estimate');
+    });
+
+    it('formatSizeEstimate should return the formatted sizes', () => {
+        const props = getProps();
+        const wrapper = getWrapper(props);
+        const gb = wrapper.instance().formatSizeEstimate(2);
+        expect(gb).toEqual('2.000 GB');
+        const mb = wrapper.instance().formatSizeEstimate(0.5);
+        expect(mb).toEqual('500.000 MB');
+        const kb = wrapper.instance().formatSizeEstimate(0.00005);
+        expect(kb).toEqual('50.000 KB');
+    });
+
+    it('setLicenseOpen should set licenseDialogOpen to true', () => {
+        const props = getProps();
+        const stateSpy = sinon.spy(ExportInfo.prototype, 'setState');
+        const wrapper = getWrapper(props);
+        expect(stateSpy.calledWith({ licenseDialogOpen: true })).toBe(false);
+        wrapper.instance().setLicenseOpen();
+        expect(stateSpy.calledWith({ licenseDialogOpen: true })).toBe(true);
+        stateSpy.restore();
+    });
+
+    it('handleFormatsClose should set formatsDialogOpen to false', () => {
+        const props = getProps();
+        const stateSpy = sinon.spy(ExportInfo.prototype, 'setState');
+        const wrapper = getWrapper(props);
+        expect(stateSpy.calledWith({ formatsDialogOpen: false })).toBe(false);
+        wrapper.instance().handleFormatsClose();
+        expect(stateSpy.calledWith({ formatsDialogOpen: false })).toBe(true);
+        stateSpy.restore();
+    });
+
+    it('handleFormatsOpen should set formatsDialogOpen to true', () => {
+        const props = getProps();
+        const stateSpy = sinon.spy(ExportInfo.prototype, 'setState');
+        const wrapper = getWrapper(props);
+        expect(stateSpy.calledWith({ formatsDialogOpen: true })).toBe(false);
+        wrapper.instance().handleFormatsOpen();
+        expect(stateSpy.calledWith({ formatsDialogOpen: true })).toBe(true);
+        stateSpy.restore();
+    });
+
+    it('handleProjectionsClose shuld set projectionsDialogOpen to false', () => {
+        const props = getProps();
+        const stateSpy = sinon.spy(ExportInfo.prototype, 'setState');
+        const wrapper = getWrapper(props);
+        expect(stateSpy.calledWith({ projectionsDialogOpen: false })).toBe(false);
+        wrapper.instance().handleProjectionsClose();
+        expect(stateSpy.calledWith({ projectionsDialogOpen: false })).toBe(true);
+        stateSpy.restore();
+    });
+
+    it('handleProjectionsOpen should set projectionsDialogOpen to true', () => {
+        const props = getProps();
+        const stateSpy = sinon.spy(ExportInfo.prototype, 'setState');
+        const wrapper = getWrapper(props);
+        expect(stateSpy.calledWith({ projectionsDialogOpen: true })).toBe(false);
+        wrapper.instance().handleProjectionsOpen();
+        expect(stateSpy.calledWith({ projectionsDialogOpen: true })).toBe(true);
+        stateSpy.restore();
+    });
+
+    it('handleLicenseClose should set licenseDialogOpen to false', () => {
+        const props = getProps();
+        const stateSpy = sinon.spy(ExportInfo.prototype, 'setState');
+        const wrapper = getWrapper(props);
+        expect(stateSpy.calledWith({ licenseDialogOpen: false })).toBe(false);
+        wrapper.instance().handleLicenseClose();
+        expect(stateSpy.calledWith({ licenseDialogOpen: false })).toBe(true);
+        stateSpy.restore();
     });
 
     it('toggleCheckbox should update exportInfo with new makePublic state', () => {
