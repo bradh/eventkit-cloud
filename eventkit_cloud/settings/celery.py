@@ -36,7 +36,7 @@ CELERYBEAT_SCHEDULE = {
     },
     'calculate-averages': {
         'task': 'Create Size Averages',
-        'schedule': 120.0
+        'schedule': crontab(minute='0', hour='*', day_of_week='*')
     }
 }
 
