@@ -190,6 +190,7 @@ class ExportTask(LockingTask):
 
     # whether to abort the whole provider if this task fails.
     abort_on_error = False
+    task_result = {}
 
     def __call__(self, *args, **kwargs):
         task_uid = kwargs.get('task_uid')
@@ -199,11 +200,11 @@ class ExportTask(LockingTask):
             task = ExportTaskRecord.objects.get(uid=task_uid)
 
             if task.status == TaskStates.CANCELED.value:
-                # the task was cancelled because an error occurred earlier on in the (presumably synchronous) task chain,
-                # and therefore nothing needs to be done
+                # the task was cancelled because an error occurred earlier on in the (presumably synchronous) task
+                # chain, and therefore nothing needs to be done
                 return {'state': TaskStates.CANCELED.value}
 
-            retval = super(ExportTask, self).__call__(*args, **kwargs)
+            retval = super(ExportTask, self).__call__(result=self.task_result, *args, **kwargs)
 
             """
             Update the successfully completed task as follows:
@@ -216,8 +217,8 @@ class ExportTask(LockingTask):
                 6. create the export task result
                 7. update the export task status and save it
             """
-            # If a task is skipped it will be successfully completed but it won't have a return value.  These tasks should
-            # just return.
+            # If a task is skipped it will be successfully completed but it won't have a return value.  These tasks
+            # should just return.
             if not retval:
                 return
             # update the task
@@ -298,7 +299,6 @@ class ExportTask(LockingTask):
         exception = cPickle.dumps(einfo)
         ete = ExportTaskException(task=task, exception=exception)
         ete.save()
-        super(ExportTask, self).on_failure(exc, task_id, args, kwargs, einfo)
         if task.status != TaskStates.CANCELED.value:
             task.status = TaskStates.FAILED.value
             task.save()
@@ -320,7 +320,6 @@ class ExportTask(LockingTask):
         Update the task state and celery task uid.
         Can use the celery uid for diagnostics.
         """
-        result = result or {}
         started = timezone.now()
         from ..tasks.models import ExportTaskRecord
         try:
@@ -417,8 +416,6 @@ def osm_data_collection_task(
 
     logger.debug("enter run for {0}".format(self.name))
 
-
-    result = result or {}
     run = ExportRun.objects.get(uid=run_uid)
 
     self.update_task_state(result=result, task_uid=task_uid)
@@ -456,7 +453,6 @@ def add_metadata_task(self, result=None, job_uid=None, provider_slug=None, user_
     job = Job.objects.get(uid=job_uid)
 
     provider = DataProvider.objects.get(slug=provider_slug)
-    result = result or {}
     input_gpkg = parse_result(result, 'geopackage')
     date_time = timezone.now()
     bbox = job.extents
@@ -490,7 +486,6 @@ def shp_export_task(self, result=None, run_uid=None, task_uid=None, stage_dir=No
     """
     Class defining SHP export function.
     """
-    result = result or {}
     self.update_task_state(result=result, task_uid=task_uid)
     gpkg = os.path.join(stage_dir, '{0}.gpkg'.format(job_name))
     shapefile = os.path.join(stage_dir, '{0}_shp'.format(job_name))
@@ -512,7 +507,6 @@ def kml_export_task(self, result=None, run_uid=None, task_uid=None, stage_dir=No
     """
     Class defining KML export function.
     """
-    result = result or {}
 
     self.update_task_state(result=result, task_uid=task_uid)
     gpkg = os.path.join(stage_dir, '{0}.gpkg'.format(job_name))
@@ -534,8 +528,6 @@ def sqlite_export_task(self, result=None, run_uid=None, task_uid=None, stage_dir
     """
     Class defining SQLITE export function.
     """
-    result = result or {}
-
     self.update_task_state(result=result, task_uid=task_uid)
     gpkg = os.path.join(stage_dir, '{0}.gpkg'.format(job_name))
     sqlitefile = os.path.join(stage_dir, '{0}.sqlite'.format(job_name))
@@ -556,8 +548,6 @@ def output_selection_geojson_task(self, result=None, task_uid=None, selection=No
     """
     Class defining geopackage export function.
     """
-    result = result or {}
-
     self.update_task_state(result=result, task_uid=task_uid)
 
     geojson_file = os.path.join(stage_dir,
@@ -584,7 +574,6 @@ def geopackage_export_task(self, result={}, run_uid=None, task_uid=None,
     """
     from .models import ExportRun, ExportTaskRecord
 
-    result = result or {}
     run = ExportRun.objects.get(uid=run_uid)
     task = ExportTaskRecord.objects.get(uid=task_uid)
 
@@ -611,8 +600,6 @@ def geotiff_export_task(self, result=None, run_uid=None, task_uid=None, stage_di
     Class defining geopackage export function.
     """
     from .models import ExportRun
-    result = result or {}
-
     self.update_task_state(result=result, task_uid=task_uid)
 
     gtiff = parse_result(result, 'result')
@@ -641,7 +628,6 @@ def clip_export_task(self, result=None, run_uid=None, task_uid=None, stage_dir=N
     :param user_details:
     :return:
     """
-    result = result or {}
     # self.update_task_state(result=result, task_uid=task_uid)
 
     dataset = parse_result(result, 'result')
@@ -660,7 +646,6 @@ def wfs_export_task(self, result=None, layer=None, config=None, run_uid=None, ta
     """
     Class defining geopackage export for WFS service.
     """
-    result = result or {}
     self.update_task_state(result=result, task_uid=task_uid)
 
     gpkg = os.path.join(stage_dir, '{0}.gpkg'.format(job_name))
@@ -683,7 +668,6 @@ def wcs_export_task(self, result=None, layer=None, config=None, run_uid=None, ta
     """
     Class defining export for WCS services
     """
-    result = result or {}
     self.update_task_state(result=result, task_uid=task_uid)
     out = os.path.join(stage_dir, '{0}.tif'.format(job_name))
     try:
@@ -707,7 +691,6 @@ def arcgis_feature_service_export_task(self, result=None, layer=None, config=Non
     """
     Class defining sqlite export for ArcFeatureService service.
     """
-    result = result or {}
     self.update_task_state(result=result, task_uid=task_uid)
     gpkg = os.path.join(stage_dir, '{0}.gpkg'.format(job_name))
     try:
@@ -731,7 +714,7 @@ def zip_export_provider(self, result=None, job_name=None, export_provider_task_u
     from .models import DataProviderTaskRecord
     from .task_runners import normalize_name
 
-    result = result or {}
+    logger.error('EJ ZIP_EXPORT_PROVIDER RECEIVED RESULT: ' + str(result))
 
     self.update_task_state(result=result, task_uid=task_uid)
 
@@ -814,7 +797,6 @@ def external_raster_service_export_task(self, result=None, layer=None, config=No
 
     from .models import ExportRun, ExportTaskRecord
 
-    result = result or {}
     run = ExportRun.objects.get(uid=run_uid)
     task = ExportTaskRecord.objects.get(uid=task_uid)
 
@@ -1190,7 +1172,6 @@ class FinalizeRunBase(LockingTask):
         Emails user notification.
         """
         from eventkit_cloud.tasks.models import ExportRun
-        result = result or {}
 
         run = ExportRun.objects.get(uid=run_uid)
         if run.job.include_zipfile and not run.zipfile_url:
@@ -1264,7 +1245,6 @@ def finalize_run_task(result=None, run_uid=None, stage_dir=None, apply_args=None
             Emails user notification.
             """
     from eventkit_cloud.tasks.models import ExportRun
-    result = result or {}
 
     run = ExportRun.objects.get(uid=run_uid)
     if run.job.include_zipfile and not run.zipfile_url:
@@ -1316,7 +1296,6 @@ def export_task_error_handler(self, result=None, run_uid=None, task_id=None, sta
     Handles un-recoverable errors in export tasks.
     """
     from eventkit_cloud.tasks.models import ExportRun
-    result = result or {}
 
     run = ExportRun.objects.get(uid=run_uid)
     try:
@@ -1346,7 +1325,7 @@ def export_task_error_handler(self, result=None, run_uid=None, task_id=None, sta
     return result
 
 
-def cancel_concurrent_task_chain(export_provider_task_uid=None):
+def cancel_synchronous_task_chain(export_provider_task_uid=None):
     from ..tasks.models import DataProviderTaskRecord
     export_provider_task = DataProviderTaskRecord.objects.filter(uid=export_provider_task_uid).first()
     for export_task in export_provider_task.tasks.all():
@@ -1376,8 +1355,6 @@ def cancel_export_provider_task(result=None, export_provider_task_uid=None, canc
     from ..tasks.exceptions import CancelException
     from billiard.einfo import ExceptionInfo
     from django.contrib.auth.models import User
-
-    result = result or {}
 
     export_provider_task = DataProviderTaskRecord.objects.filter(uid=export_provider_task_uid).first()
     canceling_user = User.objects.filter(username=canceling_username).first()
@@ -1445,8 +1422,6 @@ def cancel_export_provider_task(result=None, export_provider_task_uid=None, canc
 def cancel_run(result=None, export_run_uid=None, canceling_username=None, delete=False, *args, **kwargs):
     from ..tasks.models import ExportRun
 
-    result = result or {}
-
     export_run = ExportRun.objects.filter(uid=export_run_uid).first()
 
     if not export_run:
@@ -1469,8 +1444,6 @@ def kill_task(result=None, task_pid=None, celery_uid=None, *args, **kwargs):
 
     import os, signal
     import celery
-    result = result or {}
-
     if task_pid:
         # Don't kill tasks with default pid.
         if task_pid <= 0:
