@@ -191,22 +191,40 @@ class ExportTask(LockingTask):
     # whether to abort the whole provider if this task fails.
     abort_on_error = False
 
+    def run(self, *args, **kwargs):
+        # the first task in the chain does not have a 'result' argument
+        logger.error('ARGS: ' + str(args))
+        logger.error('KWARGS: ' + str(kwargs))
+        if not args:
+            args = ({},)
+        assert kwargs['task_uid']
+        retval = super(ExportTask, self).run(*args, **kwargs)
+
+
     def __call__(self, *args, **kwargs):
-        task_uid = kwargs.get('task_uid')
-        self.task_result = kwargs.get('result') or {}
+        # the first task in the chain does not have a 'result' argument
+        logger.error('ARGS: ' + str(args))
+        logger.error('KWARGS: ' + str(kwargs))
+        #if 'result' in kwargs.keys() and kwargs['result'] is None:
+        #    kwargs['result'] = {}
+        #elif 'result' not in kwargs.keys():
+        #    kwargs['result'] = {}
 
         try:
             from ..tasks.models import (FileProducingTaskResult, ExportTaskRecord)
+
+            task_uid = kwargs.get('task_uid')
             task = ExportTaskRecord.objects.get(uid=task_uid)
 
+            # TODO: remove this, should be done in update_task_state
             if task.status == TaskStates.CANCELED.value:
                 # the task was cancelled because an error occurred earlier on in the (presumably synchronous) task
                 # chain, and therefore nothing needs to be done
                 return {'state': TaskStates.CANCELED.value}
 
-            self.update_task_state(result=self.task_result, task_uid=task_uid)
+            self.update_task_state(result=kwargs.get('result'), task_uid=task_uid)
 
-            retval = super(ExportTask, self).__call__(result=self.task_result, *args, **kwargs)
+            retval = super(ExportTask, self).__call__(*args, **kwargs)
 
             """
             Update the successfully completed task as follows:
@@ -307,7 +325,7 @@ class ExportTask(LockingTask):
             logger.debug('Task name: {0} failed, {1}'.format(self.name, einfo))
             if self.abort_on_error:
                 export_provider_task = DataProviderTaskRecord.objects.get(tasks__uid=task_id)
-                cancel_concurrent_task_chain(export_provider_task_uid=export_provider_task.uid)
+                cancel_synchronous_task_chain(export_provider_task_uid=export_provider_task.uid)
                 run = export_provider_task.run
                 stage_dir = kwargs['stage_dir']
                 export_task_error_handler(
@@ -1022,6 +1040,7 @@ def finalize_export_provider_task(result=None, export_provider_task_uid=None,
     from eventkit_cloud.tasks.models import DataProviderTaskRecord
     # if the status was a success, we can assume all the ExportTasks succeeded. if not, we need to parse ExportTasks to
     # mark tasks not run yet as cancelled.
+    result = result or {}
     result_status = parse_result(result, 'status')
 
     with transaction.atomic():
