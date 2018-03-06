@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { mount, shallow } from 'enzyme';
 import sinon from 'sinon';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
@@ -29,8 +30,8 @@ describe('CreateExport component', () => {
         return mount(<CreateExport { ...props }><div id='my-child-element'/></CreateExport>, {
             context: {muiTheme, store},
             childContextTypes: {
-                muiTheme: React.PropTypes.object,
-                store: React.PropTypes.object
+                muiTheme: PropTypes.object,
+                store: PropTypes.object
             }
         });
     }

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {mount, shallow} from 'enzyme';
 import LicenseRow from '../../components/StatusDownloadPage/LicenseRow';
@@ -20,7 +21,7 @@ describe('LicenseRow component', () => {
         return mount(<LicenseRow {...props}/>, {
             context: {muiTheme},
             childContextTypes: {
-                muiTheme: React.PropTypes.object
+                muiTheme: PropTypes.object
             }
         });
     };

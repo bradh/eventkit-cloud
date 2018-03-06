@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react'
+import React from 'react';
+import PropTypes from 'prop-types';
 import TextField from 'material-ui/TextField';
 
 class DataPackSearchbar extends React.Component {
@@ -67,8 +68,8 @@ class DataPackSearchbar extends React.Component {
 }
 
 DataPackSearchbar.propTypes = {
-    onSearchChange: React.PropTypes.func,
-    onSearchSubmit: React.PropTypes.func,
+    onSearchChange: PropTypes.func,
+    onSearchSubmit: PropTypes.func,
 };
 
 export default DataPackSearchbar;

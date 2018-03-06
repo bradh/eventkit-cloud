@@ -1,4 +1,5 @@
-import React, {PropTypes, Component} from 'react'
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 
@@ -42,8 +43,8 @@ export class DataPackDrawer extends Component {
 }
 
 DataPackDrawer.propTypes = {
-    onApply: React.PropTypes.func.isRequired,
-    onClear: React.PropTypes.func.isRequired,
+    onApply: PropTypes.func.isRequired,
+    onClear: PropTypes.func.isRequired,
 }
 
 export default DataPackDrawer;

@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import QuickTourSection from './QuickTourSection';
 
 export class QuickTour extends Component {
@@ -26,9 +27,9 @@ export class QuickTour extends Component {
 };
 
 QuickTour.propTypes = {
-    header: React.PropTypes.string.isRequired,
-    tourSections: React.PropTypes.array.isRequired,
-    containerStyle: React.PropTypes.object,
+    header: PropTypes.string.isRequired,
+    tourSections: PropTypes.array.isRequired,
+    containerStyle: PropTypes.object,
 }
 
 export default QuickTour;

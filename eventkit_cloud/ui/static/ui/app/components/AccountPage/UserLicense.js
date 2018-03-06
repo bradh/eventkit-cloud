@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Checkbox from 'material-ui/Checkbox';
 import {Card, CardHeader, CardText} from 'material-ui/Card';
 import ToggleCheckBox from 'material-ui/svg-icons/toggle/check-box';
@@ -65,10 +66,10 @@ export class UserLicense extends Component {
 };
 
 UserLicense.PropTypes = {
-    license: React.PropTypes.object.isRequired,
-    checked: React.PropTypes.bool.isRequired,
-    onCheck: React.PropTypes.func.isRequired,
-    disabled: React.PropTypes.bool.isRequired,
+    license: PropTypes.object.isRequired,
+    checked: PropTypes.bool.isRequired,
+    onCheck: PropTypes.func.isRequired,
+    disabled: PropTypes.bool.isRequired,
 };
 
 export default UserLicense;

@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react'
+import React from 'react';
+import PropTypes from 'prop-types';
 import {connect} from 'react-redux'
 import {login} from '../actions/userActions'
 import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme'
@@ -173,7 +174,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 Form.childContextTypes = {
-    muiTheme: React.PropTypes.object.isRequired,
+    muiTheme: PropTypes.object.isRequired,
 }
 
 export default connect(null, mapDispatchToProps)(Form);

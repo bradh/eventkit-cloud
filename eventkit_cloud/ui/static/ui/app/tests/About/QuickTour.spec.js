@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {mount, shallow} from 'enzyme';
 import sinon from 'sinon';
 import QuickTour from '../../components/About/QuickTour';
@@ -28,7 +29,7 @@ describe('QuickTour component', () => {
     const getWrapper = (props) => {
         return mount(<QuickTour {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
     };
 

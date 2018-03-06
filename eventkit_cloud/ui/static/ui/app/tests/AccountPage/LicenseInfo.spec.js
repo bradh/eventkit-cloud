@@ -1,5 +1,6 @@
 import React from 'react';
-import {mount} from 'enzyme';
+import PropTypes from 'prop-types';
+import { mount } from 'enzyme';
 import sinon from 'sinon';
 import Checkbox from 'material-ui/Checkbox';
 import ToggleCheckBox from 'material-ui/svg-icons/toggle/check-box';
@@ -27,7 +28,7 @@ describe('LicenseInfo component', () => {
     const getMountedWrapper = (props) => {
         return mount(<LicenseInfo {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
     }
 

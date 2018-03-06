@@ -1,4 +1,4 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment';
 import DataPackTableRow from '../../components/StatusDownloadPage/DataPackTableRow';

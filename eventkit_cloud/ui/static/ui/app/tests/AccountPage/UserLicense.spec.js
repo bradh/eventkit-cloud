@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {mount} from 'enzyme';
 import sinon from 'sinon';
 import CheckBox from 'material-ui/Checkbox';
@@ -28,7 +29,7 @@ describe('User License component', () => {
     const getMountedWrapper = (props) => {
         return mount(<UserLicense {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
     }
 
@@ -45,16 +46,17 @@ describe('User License component', () => {
         expect(wrapper.find(CustomScrollbar)).toHaveLength(0);
     });
 
-    it('should expand the card on touchTap', () => {
+    it('should expand the card on click', () => {
         const props = getProps();
         const wrapper = getMountedWrapper(props);
         expect(wrapper.find(CardText)).toHaveLength(0);
-        const node = ReactDOM.findDOMNode(
-            TestUtils.findRenderedDOMComponentWithTag(
-                wrapper.instance(), 'button'
-            )
-        );
-        TestUtils.Simulate.touchTap(node);
+        // const node = ReactDOM.findDOMNode(
+        //     TestUtils.findRenderedDOMComponentWithTag(
+        //         wrapper.instance(), 'button'
+        //     )
+        // );
+        // TestUtils.Simulate.touchTap(node);
+        wrapper.find('button').simulate('click');
         expect(wrapper.find(CardText)).toHaveLength(1);
         expect(wrapper.find(CustomScrollbar)).toHaveLength(1);
         expect(wrapper.find('a')).toHaveLength(1);

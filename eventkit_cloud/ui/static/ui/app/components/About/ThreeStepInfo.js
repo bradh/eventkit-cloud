@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 export class ThreeStepInfo extends Component {
 
@@ -54,11 +55,11 @@ export class ThreeStepInfo extends Component {
 };
 
 ThreeStepInfo.propTypes = {
-    steps: React.PropTypes.arrayOf(React.PropTypes.shape({
-        img: React.PropTypes.obj,
-        caption: React.PropTypes.string,
+    steps: PropTypes.arrayOf(PropTypes.shape({
+        img: PropTypes.obj,
+        caption: PropTypes.string,
     })).isRequired,
-    tableStyle: React.PropTypes.object,
+    tableStyle: PropTypes.object,
 }
 
 export default ThreeStepInfo;

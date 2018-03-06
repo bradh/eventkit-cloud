@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import {mount} from 'enzyme';
 import Loading from '../../components/auth/Loading';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
@@ -9,7 +10,7 @@ describe('Loading component', () => {
     it('should render basic elemets', () => {
         const wrapper = mount(Loading(), {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.find(CircularProgress)).toHaveLength(1);
     });

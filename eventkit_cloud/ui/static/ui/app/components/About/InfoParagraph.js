@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 export class InfoParagraph extends Component {
 
@@ -23,10 +24,10 @@ export class InfoParagraph extends Component {
 };
 
 InfoParagraph.propTypes = {
-    header: React.PropTypes.string.isRequired,
-    body: React.PropTypes.string.isRequired,
-    headerStyle: React.PropTypes.object,
-    bodyStyle: React.PropTypes.object,
+    header: PropTypes.string.isRequired,
+    body: PropTypes.string.isRequired,
+    headerStyle: PropTypes.object,
+    bodyStyle: PropTypes.object,
 }
 
 export default InfoParagraph;

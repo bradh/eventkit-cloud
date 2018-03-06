@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { mount } from 'enzyme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import Dialog from 'material-ui/Dialog';
@@ -20,7 +21,7 @@ describe('DeleteDataPackDialog component', () => {
         return mount(<DeleteDataPackDialog {...props}/>, {
             context: {muiTheme},
             childContextTypes: {
-                muiTheme: React.PropTypes.object
+                muiTheme: PropTypes.object
             }
         });
     };

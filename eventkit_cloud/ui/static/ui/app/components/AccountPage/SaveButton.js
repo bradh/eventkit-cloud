@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import NavigationCheck from 'material-ui/svg-icons/navigation/check';
 import RaisedButton from 'material-ui/RaisedButton';
 
@@ -49,9 +50,9 @@ export class SaveButton extends Component {
 };
 
 SaveButton.PropTypes = {
-    saved: React.PropTypes.bool,
-    saveDisabled: React.PropTypes.bool,
-    handleSubmit: React.PropTypes.func.isRequired
+    saved: PropTypes.bool,
+    saveDisabled: PropTypes.bool,
+    handleSubmit: PropTypes.func.isRequired
 }
 
 export default SaveButton;

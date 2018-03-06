@@ -1,5 +1,6 @@
 import React from 'react';
-import {mount} from 'enzyme';
+import PropTypes from 'prop-types';
+import { mount } from 'enzyme';
 import sinon from 'sinon';
 import AppBar from 'material-ui/AppBar';
 import UserInfo from '../../components/AccountPage/UserInfo';
@@ -50,7 +51,7 @@ describe('Account Component', () => {
     const getMountedWrapper = (props) => {
         return mount(<Account {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
     };
 

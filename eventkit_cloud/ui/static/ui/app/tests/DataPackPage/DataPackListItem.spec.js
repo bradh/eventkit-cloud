@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {mount} from 'enzyme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
@@ -30,7 +31,7 @@ describe('DataPackListItem component', () => {
     const getWrapper = (props) => {
         return mount(<DataPackListItem {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
     }
 

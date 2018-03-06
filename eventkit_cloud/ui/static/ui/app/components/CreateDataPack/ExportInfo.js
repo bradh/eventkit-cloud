@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import numeral from 'numeral';
 import debounce from 'lodash/debounce';
@@ -404,7 +405,7 @@ export class ExportInfo extends React.Component {
                                     className="qa-ExportInfo-CheckBox-publish"
                                     name="makePublic"
                                     onCheck={this.toggleCheckbox}
-                                    defaultChecked={this.props.exportInfo.makePublic}
+                                    checked={this.props.exportInfo.makePublic}
                                     style={{ left: '0px', paddingLeft: '5px', margin: '30px 0px' }}
                                     label="Make Public"
                                     labelStyle={{ fontWeight: 'normal', fontSize: '16px' }}
@@ -464,7 +465,7 @@ export class ExportInfo extends React.Component {
                                                 className="qa-ExportInfo-CheckBox-provider"
                                                 name={provider.name}
                                                 style={{ left: '0px', paddingLeft: '5px' }}
-                                                defaultChecked={this.props.exportInfo.providers.map(x => x.name).indexOf(provider.name) === -1 ? false : true}
+                                                checked={this.props.exportInfo.providers.map(x => x.name).indexOf(provider.name) === -1 ? false : true}
                                                 onCheck={this.onChangeCheck}
                                                 checkedIcon={
                                                     <ActionCheckCircle
@@ -499,7 +500,7 @@ export class ExportInfo extends React.Component {
                                         style={{ display: 'inlineBlock' }}
                                         disabled
                                         checkedIcon={<ActionCheckCircle className="qa-ExportInfo-ActionCheckCircle-projection" />}
-                                    /><Info className="qa-ExportInfo-Info-projection" onTouchTap={this.handleProjectionsOpen} style={{ marginLeft: '10px', height: '24px', width: '24px', cursor: 'pointer', display: 'inlineBlock', fill: '#4598bf', verticalAlign: 'middle' }} />
+                                    /><Info className="qa-ExportInfo-Info-projection" onClick={this.handleProjectionsOpen} style={{ marginLeft: '10px', height: '24px', width: '24px', cursor: 'pointer', display: 'inlineBlock', fill: '#4598bf', verticalAlign: 'middle' }} />
                                     <BaseDialog
                                         show={this.state.projectionsDialogOpen}
                                         title="Projection Information"
@@ -524,10 +525,10 @@ export class ExportInfo extends React.Component {
                                             labelStyle={{ fontWeight: 'normal', fontSize: '16px', width: '90%' }}
                                             name={format.slug}
                                             style={{ display: 'inlineBlock' }}
-                                            defaultChecked
+                                            checked
                                             disabled
                                             checkedIcon={<ActionCheckCircle />}
-                                        /><Info onTouchTap={this.handleFormatsOpen} style={{ marginLeft: '10px', height: '24px', width: '24px', cursor: 'pointer', display: 'inlineBlock', fill: '#4598bf', verticalAlign: 'middle' }}/>
+                                        /><Info onClick={this.handleFormatsOpen} style={{ marginLeft: '10px', height: '24px', width: '24px', cursor: 'pointer', display: 'inlineBlock', fill: '#4598bf', verticalAlign: 'middle' }}/>
                                         <BaseDialog
                                             show={this.state.formatsDialogOpen}
                                             title="Format Information"
@@ -602,7 +603,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 ExportInfo.contextTypes = {
-    config: React.PropTypes.object,
+    config: PropTypes.object,
 };
 
 ExportInfo.propTypes = {
@@ -614,7 +615,7 @@ ExportInfo.propTypes = {
     updateExportInfo: PropTypes.func.isRequired,
     setNextDisabled: PropTypes.func.isRequired,
     setNextEnabled: PropTypes.func.isRequired,
-    formats: React.PropTypes.array,
+    formats: PropTypes.array,
 };
 
 export default connect(

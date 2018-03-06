@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {shallow, mount} from 'enzyme';
 import IconMenu from 'material-ui/IconMenu';
@@ -79,7 +80,7 @@ afterAll(() => {
 const getWrapper = (props) => {
     return mount(<DataPackGridItem {...props}/>, {
         context: {muiTheme},
-        childContextTypes: {muiTheme: React.PropTypes.object}
+        childContextTypes: {muiTheme: PropTypes.object}
     });
 }
 
@@ -176,14 +177,15 @@ describe('DataPackGridItem component', () => {
         stateSpy.restore();
     });
 
-    it('should negate overflow state on touchTap of card text div', () => {
+    it('should negate overflow state on click of card text div', () => {
         const props = {run: getRuns()[0], user: user, providers: providers, onRunDelete: () => {}};
         const wrapper = getWrapper(props);
         const expectedBool = !wrapper.state().overflow;
         const stateSpy = new sinon.spy(DataPackGridItem.prototype, 'setState');
-        const div = TestUtils.findRenderedComponentWithType(wrapper.instance(), CardText);
-        const node = ReactDOM.findDOMNode(div);
-        TestUtils.Simulate.touchTap(node);
+        // const div = TestUtils.findRenderedComponentWithType(wrapper.instance(), CardText);
+        // const node = ReactDOM.findDOMNode(div);
+        // TestUtils.Simulate.touchTap(node);
+        wrapper.find(CardText).find('div').simulate('click');
         expect(stateSpy.calledOnce).toBe(true);
         expect(stateSpy.calledWith({overflow: expectedBool})).toBe(true);
         stateSpy.restore();

@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import {TextField} from 'material-ui';
 import clone from 'lodash/clone';
 import uniqueId from 'lodash/uniqueId';
@@ -84,8 +85,8 @@ export class CustomTextField extends Component {
 }
 
 CustomTextField.propTypes = {
-    showRemaining: React.PropTypes.bool,
-    maxLength: React.PropTypes.number,
+    showRemaining: PropTypes.bool,
+    maxLength: PropTypes.number,
 };
 
 CustomTextField.defaultProps = {

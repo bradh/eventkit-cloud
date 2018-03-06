@@ -1,5 +1,6 @@
-import React, {Component} from 'react';
-import {Card, CardHeader, CardMedia} from 'material-ui/Card';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { Card, CardHeader, CardMedia } from 'material-ui/Card';
 import Swipeable from 'react-swipeable';
 import ChevronLeft from 'material-ui/svg-icons/navigation/chevron-left';
 import ChevronRight from 'material-ui/svg-icons/navigation/chevron-right';
@@ -143,11 +144,11 @@ export class QuickTourSection extends Component {
 };
 
 QuickTourSection.propTypes = {
-    steps: React.PropTypes.arrayOf(React.PropTypes.shape({
-        img: React.PropTypes.obj,
-        caption: React.PropTypes.string,
+    steps: PropTypes.arrayOf(PropTypes.shape({
+        img: PropTypes.obj,
+        caption: PropTypes.string,
     })).isRequired,
-    sectionTitle: React.PropTypes.string.isRequired,
+    sectionTitle: PropTypes.string.isRequired,
 }
 
 export default QuickTourSection;

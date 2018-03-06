@@ -1,4 +1,5 @@
-import React, {PropTypes, Component} from 'react'
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {GridList} from 'material-ui/GridList'
 import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card'
 import DataPackGridItem from './DataPackGridItem';

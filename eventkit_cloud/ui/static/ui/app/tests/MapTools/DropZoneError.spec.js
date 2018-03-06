@@ -1,10 +1,11 @@
-import {DropZoneError} from '../../components/MapTools/DropZoneError';
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {mount, shallow} from 'enzyme';
 import BaseDialog from '../../components/Dialog/BaseDialog';
 const Dropzone = require('react-dropzone');
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import {DropZoneError} from '../../components/MapTools/DropZoneError';
 
 describe('DropZoneError component', () => {
     const muiTheme = getMuiTheme();
@@ -24,7 +25,7 @@ describe('DropZoneError component', () => {
     const getWrapper = (props) => {
         return mount(<DropZoneError {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
     }
 
@@ -37,7 +38,7 @@ describe('DropZoneError component', () => {
         expect(wrapper.find(BaseDialog)).toHaveLength(1);
         const children = mount(wrapper.find(BaseDialog).props().children, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(children.find('.qa-DropZoneError-error')).toHaveLength(1);
         expect(children.find('.qa-DropZoneError-error').text()).toEqual('An error has occured');

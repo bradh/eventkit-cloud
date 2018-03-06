@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {mount} from 'enzyme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
@@ -21,7 +22,7 @@ describe('DateFilter component', () => {
         const props = getProps();
         const wrapper = mount(<DateFilter {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.find('p').text()).toEqual('Date Added');
         expect(wrapper.find(DatePicker)).toHaveLength(2);
@@ -37,7 +38,7 @@ describe('DateFilter component', () => {
         let props = getProps();
         const wrapper = mount(<DateFilter {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         let nextProps = getProps();
         nextProps.minDate = new Date(1448967059892);
@@ -49,7 +50,7 @@ describe('DateFilter component', () => {
         let props = getProps();
         const wrapper = mount(<DateFilter {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         let nextProps = getProps();
         nextProps.maxDate = new Date(1448967059892);

@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import AppBar from 'material-ui/AppBar';
 import UserInfo from './UserInfo';
@@ -134,10 +135,10 @@ export class Account extends Component {
 };
 
 Account.PropTypes = {
-    user: React.PropTypes.object.isRequired,
-    licenses: React.PropTypes.object.isRequired,
-    getLicenses: React.PropTypes.func.isRequired,
-    patchUser: React.PropTypes.func.isRequired,
+    user: PropTypes.object.isRequired,
+    licenses: PropTypes.object.isRequired,
+    getLicenses: PropTypes.func.isRequired,
+    patchUser: PropTypes.func.isRequired,
 }
 
 function mapStateToProps(state) {

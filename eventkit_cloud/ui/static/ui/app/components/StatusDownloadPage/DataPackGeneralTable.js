@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Info from 'material-ui/svg-icons/action/info';
 import DataPackTableRow from './DataPackTableRow';
 import BaseDialog from '../Dialog/BaseDialog';

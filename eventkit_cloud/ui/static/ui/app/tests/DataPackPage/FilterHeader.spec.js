@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {mount} from 'enzyme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
@@ -19,7 +20,7 @@ describe('FilterHeader component', () => {
         const props = getProps();
         const wrapper = mount(<FilterHeader {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.find(RaisedButton)).toHaveLength(1);
         expect(wrapper.find(RaisedButton).text()).toEqual('Apply');
@@ -34,7 +35,7 @@ describe('FilterHeader component', () => {
         props.onApply = new sinon.spy();
         const wrapper = mount(<FilterHeader {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         wrapper.find(RaisedButton).find('button').simulate('click');
         expect(props.onApply.calledOnce).toBe(true);
@@ -45,7 +46,7 @@ describe('FilterHeader component', () => {
         props.onClear = new sinon.spy();
         const wrapper = mount(<FilterHeader {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         wrapper.find(FlatButton).find('button').simulate('click');
         expect(props.onClear.calledOnce).toBe(true);

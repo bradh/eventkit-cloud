@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import { mount } from 'enzyme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
@@ -25,7 +26,7 @@ describe('AlertCallout component', () => {
     const getWrapper = props => (
         mount(<BufferDialog {...props} />, {
             context: { muiTheme },
-            childContextTypes: { muiTheme: React.PropTypes.object },
+            childContextTypes: { muiTheme: PropTypes.object },
         })
     );
 

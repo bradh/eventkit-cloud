@@ -1,11 +1,12 @@
-import {DropZoneDialog} from '../../components/MapTools/DropZoneDialog';
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {mount, shallow} from 'enzyme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import BaseDialog from '../../components/Dialog/BaseDialog';
 import RaisedButton from 'material-ui/RaisedButton';
 import FileFileUpload from 'material-ui/svg-icons/file/file-upload';
+import {DropZoneDialog} from '../../components/MapTools/DropZoneDialog';
 const Dropzone = require('react-dropzone');
 
 describe('DropZoneDialog component', () => {
@@ -22,7 +23,7 @@ describe('DropZoneDialog component', () => {
     const getWrapper = (props) => {
         return mount(<DropZoneDialog {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
     }
 
@@ -33,7 +34,7 @@ describe('DropZoneDialog component', () => {
         const children = mount(wrapper.find(BaseDialog).props().children, {
             ...props,
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(children.find(Dropzone)).toHaveLength(1);
         expect(children.find('.qa-DropZoneDialog-text')).toHaveLength(1);
@@ -54,7 +55,7 @@ describe('DropZoneDialog component', () => {
         const children = mount(wrapper.find(BaseDialog).props().children, {
             ...props,
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         children.find(Dropzone).simulate('drop', { dataTransfer: {files: [fakeFile] } });
         expect(props.setImportModalState.calledOnce).toEqual(true);
@@ -72,7 +73,7 @@ describe('DropZoneDialog component', () => {
         const children = mount(wrapper.find(BaseDialog).props().children, {
             ...props,
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         children.find(Dropzone).simulate('drop', { dataTransfer: {files: oversizedFile } });
         expect(props.setImportModalState.calledOnce).toEqual(false);

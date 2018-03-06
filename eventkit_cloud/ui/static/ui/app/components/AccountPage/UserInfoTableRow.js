@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 export class UserInfoTableRow extends Component {
 
@@ -28,8 +29,8 @@ export class UserInfoTableRow extends Component {
 };
 
 UserInfoTableRow.PropTypes = {
-    title: React.PropTypes.string,
-    data: React.PropTypes.string
+    title: PropTypes.string,
+    data: PropTypes.string
 };
 
 export default UserInfoTableRow;

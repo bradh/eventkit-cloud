@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {mount, shallow} from 'enzyme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
@@ -34,7 +35,7 @@ describe('LoadButtons component', () => {
         return mount(<MapPopup {...props}/>, {
             context: {muiTheme},
             childContextTypes: {
-                muiTheme: React.PropTypes.object,
+                muiTheme: PropTypes.object,
             }
         });
     }

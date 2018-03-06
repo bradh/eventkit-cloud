@@ -1,5 +1,5 @@
 import React from 'react';
-import sinon from 'sinon';
+import PropTypes from 'prop-types';
 import { mount } from 'enzyme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
@@ -17,7 +17,7 @@ describe('PermissionsFilter component', () => {
     const getWrapper = props => (
         mount(<PermissionsFilter {...props} />, {
             context: { muiTheme },
-            childContextTypes: { muiTheme: React.PropTypes.object },
+            childContextTypes: { muiTheme: PropTypes.object },
         })
     );
 

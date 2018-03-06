@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { GridList } from 'material-ui/GridList';
 import Dot from 'material-ui/svg-icons/av/fiber-manual-record';
 import axios from 'axios';
@@ -973,7 +974,7 @@ export class MapView extends Component {
 }
 
 MapView.contextTypes = {
-    config: React.PropTypes.object,
+    config: PropTypes.object,
 };
 
 MapView.propTypes = {

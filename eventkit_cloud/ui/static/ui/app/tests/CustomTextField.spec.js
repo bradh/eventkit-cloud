@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {mount} from 'enzyme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import CustomTextField from '../components/CustomTextField';
@@ -10,7 +11,7 @@ describe('CustomTextField component', () => {
     it('should render a material-ui TextField component', () => {
         const wrapper = mount(<CustomTextField/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.find(TextField)).toHaveLength(1);
     });
@@ -18,7 +19,7 @@ describe('CustomTextField component', () => {
     it('should show remaining characters when maxLength is present and input is focused', () => {
         const wrapper = mount(<CustomTextField maxLength={100}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         const input = wrapper.find('input');
         const charsRemaining = wrapper.find(TextField).parent().last('div');
@@ -34,7 +35,7 @@ describe('CustomTextField component', () => {
     it('should not show remaining characters when showRemaining is false', () => {
         const wrapper = mount(<CustomTextField maxLength={100} showRemaining={false}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         const input = wrapper.find('input');
         const charsRemaining = wrapper.find(TextField).parent().last('div');

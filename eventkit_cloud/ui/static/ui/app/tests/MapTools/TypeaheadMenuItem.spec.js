@@ -1,11 +1,12 @@
-import {TypeaheadMenuItem} from '../../components/MapTools/TypeaheadMenuItem';
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {mount, shallow} from 'enzyme';
 import {MenuItem} from 'react-bootstrap-typeahead';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import ImageCropDin from 'material-ui/svg-icons/image/crop-din';
 import ActionRoom from 'material-ui/svg-icons/action/room';
+import {TypeaheadMenuItem} from '../../components/MapTools/TypeaheadMenuItem';
 
 describe('TypeaheadMenuItem component', () => {
     const muiTheme = getMuiTheme();
@@ -33,11 +34,11 @@ describe('TypeaheadMenuItem component', () => {
             <TypeaheadMenuItem {...props}/>, {
                 context: context,
                 childContextTypes: {
-                    activeIndex: React.PropTypes.number.isRequired,
-                    onActiveItemChange: React.PropTypes.func.isRequired,
-                    onInitialItemChange: React.PropTypes.func.isRequired,
-                    onMenuItemClick: React.PropTypes.func.isRequired,
-                    muiTheme: React.PropTypes.object
+                    activeIndex: PropTypes.number.isRequired,
+                    onActiveItemChange: PropTypes.func.isRequired,
+                    onInitialItemChange: PropTypes.func.isRequired,
+                    onMenuItemClick: PropTypes.func.isRequired,
+                    muiTheme: PropTypes.object
                 }
             }
         );
@@ -59,11 +60,11 @@ describe('TypeaheadMenuItem component', () => {
             <TypeaheadMenuItem {...props}/>, {
                 context: context,
                 childContextTypes: {
-                    activeIndex: React.PropTypes.number.isRequired,
-                    onActiveItemChange: React.PropTypes.func.isRequired,
-                    onInitialItemChange: React.PropTypes.func.isRequired,
-                    onMenuItemClick: React.PropTypes.func.isRequired,
-                    muiTheme: React.PropTypes.object
+                    activeIndex: PropTypes.number.isRequired,
+                    onActiveItemChange: PropTypes.func.isRequired,
+                    onInitialItemChange: PropTypes.func.isRequired,
+                    onMenuItemClick: PropTypes.func.isRequired,
+                    muiTheme: PropTypes.object
                 }
             }
         );
@@ -83,11 +84,11 @@ describe('TypeaheadMenuItem component', () => {
             <TypeaheadMenuItem {...props}/>, {
                 context: context,
                 childContextTypes: {
-                    activeIndex: React.PropTypes.number.isRequired,
-                    onActiveItemChange: React.PropTypes.func.isRequired,
-                    onInitialItemChange: React.PropTypes.func.isRequired,
-                    onMenuItemClick: React.PropTypes.func.isRequired,
-                    muiTheme: React.PropTypes.object
+                    activeIndex: PropTypes.number.isRequired,
+                    onActiveItemChange: PropTypes.func.isRequired,
+                    onInitialItemChange: PropTypes.func.isRequired,
+                    onMenuItemClick: PropTypes.func.isRequired,
+                    muiTheme: PropTypes.object
                 }
             }
         );

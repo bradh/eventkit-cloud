@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {shallow, mount} from 'enzyme';
 import { Link } from 'react-router';
@@ -12,7 +13,7 @@ describe('DataPackLinkButton component', () => {
     it('should render a linked button', () => {
         const wrapper = mount(<DataPackLinkButton />, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.find(Link)).toHaveLength(1);
         expect(wrapper.find(Link).props().to).toEqual('/create');

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {mount} from 'enzyme';
 import sinon from 'sinon';
 import SaveButton from '../../components/AccountPage/SaveButton';
@@ -20,7 +21,7 @@ describe('SaveButton component', () => {
     const getMountedWrapper = (props) => {
         return mount(<SaveButton {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
     }
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import { mount } from 'enzyme';
 import raf from 'raf';
@@ -91,8 +92,8 @@ describe('ExportAOI component', () => {
         return mount(<ExportAOI {...props} />, {
             context: { muiTheme, config },
             childContextTypes: {
-                muiTheme: React.PropTypes.object,
-                config: React.PropTypes.object,
+                muiTheme: PropTypes.object,
+                config: PropTypes.object,
             },
         });
     };

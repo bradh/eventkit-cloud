@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {mount, shallow} from 'enzyme';
 import {DataPackGridItem} from '../../components/DataPackPage/DataPackGridItem';
@@ -45,7 +46,7 @@ describe('DataPackGrid component', () => {
         const getColumnSpy = new sinon.spy(DataPackGrid.prototype, 'getColumns');
         const wrapper = mount(<DataPackGrid {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.find(GridList)).toHaveLength(1);
         expect(wrapper.find(DataPackGridItem)).toHaveLength(3);

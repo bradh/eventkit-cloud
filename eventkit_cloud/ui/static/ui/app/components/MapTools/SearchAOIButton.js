@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import ActionSearch from 'material-ui/svg-icons/action/search';
 import ContentClear from 'material-ui/svg-icons/content/clear';
 
@@ -65,8 +66,8 @@ export class SearchAOIButton extends Component {
 
 SearchAOIButton.propTypes = {
     buttonState: PropTypes.string,
-    handleCancel: React.PropTypes.func,
-    setAllButtonsDefault: React.PropTypes.func,
+    handleCancel: PropTypes.func,
+    setAllButtonsDefault: PropTypes.func,
 }
 
 export default SearchAOIButton;

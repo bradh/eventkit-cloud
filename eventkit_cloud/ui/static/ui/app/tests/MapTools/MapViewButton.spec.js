@@ -1,10 +1,11 @@
-import {MapViewButton} from '../../components/MapTools/MapViewButton';
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {mount, shallow} from 'enzyme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import ActionSettingsOverscan from 'material-ui/svg-icons/action/settings-overscan';
 import ContentClear from 'material-ui/svg-icons/content/clear';
+import {MapViewButton} from '../../components/MapTools/MapViewButton';
 
 describe('MapViewButton component', () => {
     const muiTheme = getMuiTheme();
@@ -21,7 +22,7 @@ describe('MapViewButton component', () => {
         const props = getProps()
         const wrapper = mount(<MapViewButton {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.find('button')).toHaveLength(1);
         expect(wrapper.find('div')).toHaveLength(2);
@@ -33,7 +34,7 @@ describe('MapViewButton component', () => {
         const props = getProps();
         const wrapper = mount(<MapViewButton {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         const newProps = getProps();
         newProps.buttonState = 'INACTIVE';
@@ -48,7 +49,7 @@ describe('MapViewButton component', () => {
         const props = getProps();
         const wrapper = mount(<MapViewButton {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         const newProps = getProps();
         newProps.buttonState = 'SELECTED';
@@ -63,7 +64,7 @@ describe('MapViewButton component', () => {
         const props = getProps();
         const wrapper = mount(<MapViewButton {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         let newProps = getProps();
         newProps.buttonState = 'SELECTED';
@@ -81,7 +82,7 @@ describe('MapViewButton component', () => {
         props.setMapView = sinon.spy();
         const wrapper = mount(<MapViewButton {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         wrapper.find('button').simulate('click');
         expect(props.setMapViewButtonSelected.calledOnce).toEqual(true);
@@ -92,7 +93,7 @@ describe('MapViewButton component', () => {
         const props = getProps();
         const wrapper = mount(<MapViewButton {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         let newProps = getProps();
         newProps.buttonState = 'INACTIVE';

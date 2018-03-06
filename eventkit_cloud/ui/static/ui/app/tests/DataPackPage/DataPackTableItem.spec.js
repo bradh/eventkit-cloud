@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {shallow, mount} from 'enzyme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
@@ -30,7 +31,7 @@ describe('DataPackTableItem component', () => {
         const props = getProps();
         const wrapper = mount(<DataPackTableItem {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.find(TableRow)).toHaveLength(1);
         expect(wrapper.find(TableRowColumn)).toHaveLength(8);
@@ -51,7 +52,7 @@ describe('DataPackTableItem component', () => {
         let props = getProps();
         const wrapper = mount(<DataPackTableItem {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         props.run.user = 'Not Admin';
         props.run.job.published = true;

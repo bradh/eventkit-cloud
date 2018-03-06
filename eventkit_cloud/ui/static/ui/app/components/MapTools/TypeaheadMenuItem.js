@@ -1,7 +1,7 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import css from '../../styles/typeahead.css';
-import {MenuItem} from 'react-bootstrap-typeahead';
-import isEqual from 'lodash/isEqual';
+import { MenuItem } from 'react-bootstrap-typeahead';
 import ImageCropDin from 'material-ui/svg-icons/image/crop-din';
 import ActionRoom from 'material-ui/svg-icons/action/room';
 
@@ -84,8 +84,8 @@ export class TypeaheadMenuItem extends Component {
 }
 
 TypeaheadMenuItem.propTypes = {
-    result: React.PropTypes.object,
-    index: React.PropTypes.number,
+    result: PropTypes.object,
+    index: PropTypes.number,
 }
 
 export default TypeaheadMenuItem;

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {mount, shallow} from 'enzyme';
 import DropDownMenu from 'material-ui/DropDownMenu';
@@ -20,7 +21,7 @@ describe('DataPackSortDropDown component', () => {
         let props = getProps();
         const wrapper = mount(<DataPackSortDropDown {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.find(DropDownMenu)).toHaveLength(1);
     });
@@ -29,7 +30,7 @@ describe('DataPackSortDropDown component', () => {
         let props = getProps();
         const wrapper = mount(<DataPackSortDropDown {...props}/> , {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.text()).toEqual('Newest');
     });
@@ -39,7 +40,7 @@ describe('DataPackSortDropDown component', () => {
         props.value = 'started_at';
         const wrapper = mount(<DataPackSortDropDown {...props}/> , {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.text()).toEqual('Oldest ');
     });
@@ -49,7 +50,7 @@ describe('DataPackSortDropDown component', () => {
         props.value = 'job__name';
         const wrapper = mount(<DataPackSortDropDown {...props}/> , {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.text()).toEqual('Name (A-Z)');
     });
@@ -59,7 +60,7 @@ describe('DataPackSortDropDown component', () => {
         props.value = '-job__name';
         const wrapper = mount(<DataPackSortDropDown {...props}/> , {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.text()).toEqual('Name (Z-A)');
     });
@@ -68,7 +69,7 @@ describe('DataPackSortDropDown component', () => {
         const props = getProps();
         const wrapper = shallow(<DataPackSortDropDown {...props} />, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.find(DropDownMenu)).toHaveLength(1);
         const menu = shallow(wrapper.find(DropDownMenu).node, {context: {muiTheme}});
@@ -90,7 +91,7 @@ describe('DataPackSortDropDown component', () => {
             open: true,
         });
         const event = {persist: () => {},};
-        menu.find(Menu).props().onItemTouchTap(
+        menu.find(Menu).props().onItemClick(
             event,
             {
                 props: {
@@ -109,7 +110,7 @@ describe('DataPackSortDropDown component', () => {
         const props = getProps();
         const wrapper = mount(<DataPackSortDropDown {...props}/> , {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.find(DropDownMenu).props().labelStyle.fontSize).toEqual('14px');
 

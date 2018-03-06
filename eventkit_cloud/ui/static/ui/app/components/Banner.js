@@ -1,4 +1,5 @@
-import * as React from 'react'
+import * as React from 'react';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 
 class Banner extends React.Component {
@@ -27,7 +28,7 @@ class Banner extends React.Component {
 }
 
 Banner.contextTypes = {
-    config: React.PropTypes.object
+    config: PropTypes.object
 }
 
 export default Banner;

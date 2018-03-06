@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Table, TableBody, TableHeader,
     TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
 import IconMenu from 'material-ui/IconMenu';
@@ -451,7 +452,7 @@ export class ProviderRow extends Component {
                         >
                             <IconButton
                                 disableTouchRipple
-                                onTouchTap={this.handleToggle}
+                                onClick={this.handleToggle}
                                 iconStyle={{ fill: '4598bf' }}
                             >
                                 {this.state.openTable ?

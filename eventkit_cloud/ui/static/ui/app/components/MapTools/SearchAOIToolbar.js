@@ -1,11 +1,12 @@
-import React, {Component, PropTypes} from 'react';
-import css from '../../styles/typeahead.css';
-import {Typeahead, Menu, MenuItem} from 'react-bootstrap-typeahead';
-import {TypeaheadMenuItem} from './TypeaheadMenuItem';
-import SearchAOIButton from './SearchAOIButton';
-import {getGeocode} from '../../actions/searchToolbarActions';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import 'react-bootstrap-typeahead/css/Typeahead.css';
 import debounce from 'lodash/debounce';
-import {CircularProgress} from "material-ui";
+import { CircularProgress } from 'material-ui';
+import { Typeahead, Menu } from 'react-bootstrap-typeahead';
+import { TypeaheadMenuItem } from './TypeaheadMenuItem';
+import SearchAOIButton from './SearchAOIButton';
+import css from '../../styles/typeahead.css';
 
 export class SearchAOIToolbar extends Component {
 
@@ -118,7 +119,7 @@ export class SearchAOIToolbar extends Component {
                             true
                         )}
                         paginate={false}
-                        emptyLabel={''}
+                        emptyLabel=""
                         minLength={2}
                         renderMenu={(results, menuProps) => {
                             return(

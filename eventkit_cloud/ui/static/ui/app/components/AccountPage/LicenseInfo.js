@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Checkbox from 'material-ui/Checkbox';
 import ToggleCheckBox from 'material-ui/svg-icons/toggle/check-box';
 import ToggleCheckBoxOutlineBlank from 'material-ui/svg-icons/toggle/check-box-outline-blank';
@@ -67,11 +68,11 @@ export class LicenseInfo extends Component {
 };
 
 LicenseInfo.PropTypes = {
-    user: React.PropTypes.object.isRequired,
-    licenses: React.PropTypes.object.isRequired,
-    acceptedLicenses: React.PropTypes.object.isRequired,
-    onLicenseCheck: React.PropTypes.func.isRequired,
-    onAllCheck: React.PropTypes.func.isRequired,
+    user: PropTypes.object.isRequired,
+    licenses: PropTypes.object.isRequired,
+    acceptedLicenses: PropTypes.object.isRequired,
+    onLicenseCheck: PropTypes.func.isRequired,
+    onAllCheck: PropTypes.func.isRequired,
 }
 
 export default LicenseInfo;

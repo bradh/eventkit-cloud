@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import AppBar from 'material-ui/AppBar';
 import CircularProgress from 'material-ui/CircularProgress';
@@ -25,6 +26,7 @@ export class DataPackPage extends React.Component {
         this.handleToggle = this.handleToggle.bind(this);
         this.onSearch = this.onSearch.bind(this);
         this.checkForEmptySearch = this.checkForEmptySearch.bind(this);
+        this.handleSortChange = this.handleSortChange.bind(this);
         this.handleOwnerFilter = this.handleOwnerFilter.bind(this);
         this.handleFilterApply = this.handleFilterApply.bind(this);
         this.handleFilterClear = this.handleFilterClear.bind(this);

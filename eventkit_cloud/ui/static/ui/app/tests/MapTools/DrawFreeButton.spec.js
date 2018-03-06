@@ -1,10 +1,11 @@
-import {DrawFreeButton} from '../../components/MapTools/DrawFreeButton';
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {mount, shallow} from 'enzyme';
 import ContentCreate from 'material-ui/svg-icons/content/create';
 import ContentClear from 'material-ui/svg-icons/content/clear';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import {DrawFreeButton} from '../../components/MapTools/DrawFreeButton';
 
 describe('DrawFreeButton component', () => {
     const muiTheme = getMuiTheme();
@@ -22,7 +23,7 @@ describe('DrawFreeButton component', () => {
         const props = getProps()
         const wrapper = mount(<DrawFreeButton {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.find('button')).toHaveLength(1);
         expect(wrapper.find('div')).toHaveLength(2);
@@ -34,7 +35,7 @@ describe('DrawFreeButton component', () => {
         const props = getProps();
         const wrapper = mount(<DrawFreeButton {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         const newProps = getProps();
         newProps.buttonState = 'INACTIVE';
@@ -49,7 +50,7 @@ describe('DrawFreeButton component', () => {
         const props = getProps();
         const wrapper = mount(<DrawFreeButton {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         const newProps = getProps();
         newProps.buttonState = 'SELECTED'
@@ -64,7 +65,7 @@ describe('DrawFreeButton component', () => {
         const props = getProps();
         const wrapper = mount(<DrawFreeButton {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         let newProps = getProps();
         newProps.buttonState = 'SELECTED';
@@ -82,7 +83,7 @@ describe('DrawFreeButton component', () => {
         props.updateMode = sinon.spy();
         const wrapper = mount(<DrawFreeButton {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         wrapper.find('button').simulate('click');
         expect(props.setFreeButtonSelected.calledOnce).toEqual(true);
@@ -93,7 +94,7 @@ describe('DrawFreeButton component', () => {
         const props = getProps();
         const wrapper = mount(<DrawFreeButton {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         let newProps = getProps();
         newProps.buttonState = 'INACTIVE';

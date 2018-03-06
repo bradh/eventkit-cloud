@@ -1,4 +1,5 @@
-import React, {PropTypes, Component} from 'react'
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {TableRow, TableRowColumn} from 'material-ui/Table';
 import BaseDialog from '../Dialog/BaseDialog';
 

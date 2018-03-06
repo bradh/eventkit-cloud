@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import AppBar from 'material-ui/AppBar';
@@ -389,7 +390,7 @@ export class Application extends Component {
                             className="qa-Application-AppBar"
                             style={styles.appBar}
                             title={img}
-                            onLeftIconButtonTouchTap={this.handleToggle}
+                            onLeftIconButtonClick={this.handleToggle}
                             showMenuIconButton={!!this.props.userData}
                         />
                     </header>

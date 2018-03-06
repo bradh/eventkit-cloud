@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import { mount, shallow } from 'enzyme';
 import IconMenu from 'material-ui/IconMenu';
@@ -103,7 +104,7 @@ describe('ProviderRow component', () => {
         mount(<ProviderRow {...props} />, {
             context: { muiTheme },
             childContextTypes: {
-                muiTheme: React.PropTypes.object,
+                muiTheme: PropTypes.object,
             },
         })
     );
@@ -352,7 +353,7 @@ describe('ProviderRow component', () => {
         const icon = wrapper.instance().getTaskDownloadIcon(task);
         const elem = mount(icon, {
             context: { muiTheme },
-            childContextTypes: { muiTheme: React.PropTypes.object },
+            childContextTypes: { muiTheme: PropTypes.object },
         });
         expect(elem.is(CloudDownload)).toBe(true);
         expect(elem.props().onClick).toBe(undefined);
@@ -365,7 +366,7 @@ describe('ProviderRow component', () => {
         const icon = wrapper.instance().getTaskDownloadIcon(task);
         const elem = mount(icon, {
             context: { muiTheme },
-            childContextTypes: { muiTheme: React.PropTypes.object },
+            childContextTypes: { muiTheme: PropTypes.object },
         });
         expect(elem.is(CloudDownload)).toBe(true);
         expect(elem.props().onClick).not.toBe(undefined);

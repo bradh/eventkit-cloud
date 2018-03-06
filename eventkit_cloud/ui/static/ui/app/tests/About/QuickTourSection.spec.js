@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {mount, shallow} from 'enzyme';
 import sinon from 'sinon';
 import {Card, CardHeader, CardMedia} from 'material-ui/Card';
@@ -28,7 +29,7 @@ describe('QuickTour component', () => {
     const getWrapper = (props) => {
         return mount(<QuickTourSection {...props}/>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
     };
 

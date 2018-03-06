@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import raf from 'raf';
 import { mount, shallow } from 'enzyme';
@@ -83,8 +84,8 @@ describe('MapView component', () => {
         return mount(<MapView {...props} />, {
             context: { muiTheme, config },
             childContextTypes: {
-                muiTheme: React.PropTypes.object,
-                config: React.PropTypes.object,
+                muiTheme: PropTypes.object,
+                config: PropTypes.object,
             },
         });
     };

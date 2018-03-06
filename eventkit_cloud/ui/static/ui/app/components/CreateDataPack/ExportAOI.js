@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import debounce from 'lodash/debounce';
@@ -749,7 +750,7 @@ export class ExportAOI extends Component {
 }
 
 ExportAOI.contextTypes = {
-    config: React.PropTypes.object
+    config: PropTypes.object
 }
 
 ExportAOI.propTypes = {

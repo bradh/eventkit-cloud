@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import UserInfoTableRow from './UserInfoTableRow';
 import moment from 'moment';
 
@@ -36,8 +37,8 @@ export class UserInfo extends Component {
 };
 
 UserInfo.PropTypes = {
-    user: React.PropTypes.object.isRequired,
-    updateLink: React.PropTypes.string,
+    user: PropTypes.object.isRequired,
+    updateLink: PropTypes.string,
 }
 
 export default UserInfo;

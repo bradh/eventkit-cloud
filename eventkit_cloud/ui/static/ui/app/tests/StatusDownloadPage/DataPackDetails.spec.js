@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {mount, shallow} from 'enzyme';
 import {DataPackDetails} from '../../components/StatusDownloadPage/DataPackDetails';
@@ -34,7 +35,7 @@ describe('DataPackDetails component', () => {
         return mount(<DataPackDetails {...props}/>, {
             context: {muiTheme},
             childContextTypes: {
-                muiTheme: React.PropTypes.object
+                muiTheme: PropTypes.object
             }
         });
     }

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import sinon from 'sinon';
 import {mount, shallow} from 'enzyme';
 import {SearchAOIToolbar} from '../../components/MapTools/SearchAOIToolbar';
@@ -33,7 +34,7 @@ describe('SearchAOIToolbar button', () => {
         const props = getProps();
         const wrapper = mount(<Provider store={store}><SearchAOIToolbar {...props}/></Provider>, {
             context: {muiTheme},
-            childContextTypes: {muiTheme: React.PropTypes.object}
+            childContextTypes: {muiTheme: PropTypes.object}
         });
         expect(wrapper.find(Typeahead)).toHaveLength(1);
         expect(wrapper.find(Menu)).toHaveLength(0);
