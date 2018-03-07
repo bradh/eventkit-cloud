@@ -521,7 +521,7 @@ export class ExportInfo extends React.Component {
                                             onMouseOut={this.handleRefreshTooltipClose.bind(this)}
                                             onTouchStart={this.handleRefreshTooltipOpen.bind(this)}
                                             onTouchEnd={this.handleRefreshTooltipClose.bind(this)}
-                                            onTouchTap={this.onRefresh.bind(this)}
+                                            onClick={this.onRefresh.bind(this)}
                                         />
                                         <BaseTooltip
                                             show={this.state.refreshTooltipOpen}
@@ -532,7 +532,7 @@ export class ExportInfo extends React.Component {
                                             }}
                                             onMouseOver={this.handleRefreshTooltipOpen.bind(this)}
                                             onMouseOut={this.handleRefreshTooltipClose.bind(this)}
-                                            onTouchTap={this.onRefresh.bind(this)}
+                                            onClick={this.onRefresh.bind(this)}
                                         >
                                     <div>You may try to resolve errors by running the availability check again.</div>
                                 </BaseTooltip>

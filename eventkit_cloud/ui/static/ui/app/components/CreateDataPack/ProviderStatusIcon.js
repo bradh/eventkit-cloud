@@ -1,8 +1,8 @@
-import React, {PropTypes, Component} from 'react'
-import AlertWarning from 'material-ui/svg-icons/alert/warning'
-import AlertError from 'material-ui/svg-icons/alert/error'
-import ActionDone from 'material-ui/svg-icons/action/done'
-import NotificationSyncProblem from 'material-ui/svg-icons/notification/sync-problem';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import AlertWarning from 'material-ui/svg-icons/alert/warning';
+import AlertError from 'material-ui/svg-icons/alert/error';
+import ActionDone from 'material-ui/svg-icons/action/done';
 import CircularProgress from 'material-ui/CircularProgress';
 import BaseTooltip from '../BaseTooltip';
 
@@ -15,9 +15,9 @@ export class ProviderStatusIcon extends Component {
         };
     }
 
-    onTouchTap(e) {
-        if (typeof this.props.onTouchTap === 'function') {
-            this.props.onTouchTap(e);
+    onClick(e) {
+        if (typeof this.props.onClick === 'function') {
+            this.props.onClick(e);
         }
         this.handleTooltipOpen(e);
     }
@@ -33,7 +33,6 @@ export class ProviderStatusIcon extends Component {
     }
 
     render() {
-
         var style = {
             base: {
                 display: 'inline-block',
@@ -95,7 +94,7 @@ export class ProviderStatusIcon extends Component {
                 <StatusIcon
                     style={style.icon}
                     title={this.props.availability.message}
-                    onTouchTap={this.onTouchTap.bind(this)}
+                    onClick={this.onClick.bind(this)}
                     onMouseOver={this.handleTooltipOpen.bind(this)}
                     onMouseOut={this.handleTooltipClose.bind(this)}
                     onTouchStart={this.handleTooltipOpen.bind(this)}
@@ -117,7 +116,7 @@ export class ProviderStatusIcon extends Component {
                     }}
                     onMouseOver={this.handleTooltipOpen.bind(this)}
                     onMouseOut={this.handleTooltipClose.bind(this)}
-                    onTouchTap={this.onTouchTap.bind(this)}
+                    onClick={this.onClick.bind(this)}
                 >
                     <div>{message}</div>
                 </BaseTooltip>

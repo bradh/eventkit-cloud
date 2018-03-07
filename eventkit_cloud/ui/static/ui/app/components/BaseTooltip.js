@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 export class BaseTooltip extends Component {
 
@@ -14,9 +15,9 @@ export class BaseTooltip extends Component {
         }
     }
 
-    onTouchTap(e) {
-        if (typeof this.props.onTouchTap === 'function') {
-            this.props.onTouchTap(e);
+    onClick(e) {
+        if (typeof this.props.onClick === 'function') {
+            this.props.onClick(e);
         }
     }
 
@@ -87,7 +88,7 @@ export class BaseTooltip extends Component {
                 style={styles.tooltip}
                 onMouseOver={this.onMouseOver.bind(this)}
                 onMouseOut={this.onMouseOut.bind(this)}
-                onTouchTap={this.onTouchTap.bind(this)}
+                onClick={this.onClick.bind(this)}
             >
                 <div className="qa-BaseTooltip-title" style={styles.title}>
                     <strong>{this.props.title ? this.props.title : ''}</strong>
