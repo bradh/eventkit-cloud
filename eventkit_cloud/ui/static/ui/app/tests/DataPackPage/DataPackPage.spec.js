@@ -333,7 +333,7 @@ describe('DataPackPage component', () => {
             search,
         });
         wrapper.instance().makeRunRequest();
-        expect(props.getRuns.calledOnce).toBe(true);
+        expect(props.getRuns.called).toBe(true);
         expect(props.getRuns.calledWith(expectedParams, null)).toBe(true);
     });
 

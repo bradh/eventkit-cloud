@@ -360,7 +360,7 @@ export class DataPackGridItem extends Component {
                         </div>
                     }
                     subtitle={
-                        <div>
+                        <div className="qa-DataPackGridItem-CardTitle-subtitle">
                             <div
                                 style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                             >

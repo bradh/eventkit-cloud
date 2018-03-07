@@ -1,6 +1,5 @@
 import React from 'react';
-import {mount, shallow} from 'enzyme';
-import sinon from 'sinon';
+import { mount } from 'enzyme';
 import ThreeStepInfo from '../../components/About/ThreeStepInfo';
 import create_img from '../../../images/3_stage_create.png';
 import manage_img from '../../../images/3_stage_manage.png';
@@ -18,7 +17,7 @@ describe('ThreeStepInfo component', () => {
     }
 
     const getWrapper = (props) => {
-        return mount(<ThreeStepInfo {...props}/>);
+        return mount(<ThreeStepInfo {...props} />);
     }
 
     it('should render all the table elements', () => {
@@ -54,6 +53,7 @@ describe('ThreeStepInfo component', () => {
         const wrapper = getWrapper(props);
         window.resizeTo(700, 800);
         expect(window.innerWidth).toEqual(700);
+        wrapper.instance().forceUpdate();
         wrapper.update();
         expect(wrapper.find('table').props().style.fontSize).toEqual('14px');
     });
@@ -63,6 +63,7 @@ describe('ThreeStepInfo component', () => {
         const wrapper = getWrapper(props);
         window.resizeTo(1300, 1000);
         expect(window.innerWidth).toEqual(1300);
+        wrapper.instance().forceUpdate();
         wrapper.update();
         expect(wrapper.find('table').props().style.fontSize).toEqual('16px');
     });

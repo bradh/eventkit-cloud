@@ -49,7 +49,7 @@ export class SaveButton extends Component {
     };
 };
 
-SaveButton.PropTypes = {
+SaveButton.propTypes = {
     saved: PropTypes.bool,
     saveDisabled: PropTypes.bool,
     handleSubmit: PropTypes.func.isRequired

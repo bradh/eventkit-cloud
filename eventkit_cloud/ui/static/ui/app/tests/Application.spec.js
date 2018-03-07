@@ -78,23 +78,23 @@ describe('Application component', () => {
         const wrapper = getWrapper(props);
         wrapper.instance().handleMouseOver = handleSpy;
         expect(handleSpy.called).toBe(false);
-        wrapper.find('.qa-Application-Link-exports').simulate('mouseEnter');
+        wrapper.find('.qa-Application-Link-exports').hostNodes().simulate('mouseEnter');
         expect(handleSpy.callCount).toBe(1);
         expect(handleSpy.calledWith('exports')).toBe(true);
 
-        wrapper.find('.qa-Application-Link-create').simulate('mouseEnter');
+        wrapper.find('.qa-Application-Link-create').hostNodes().simulate('mouseEnter');
         expect(handleSpy.callCount).toBe(2);
         expect(handleSpy.calledWith('create')).toBe(true);
 
-        wrapper.find('.qa-Application-Link-about').simulate('mouseEnter');
+        wrapper.find('.qa-Application-Link-about').hostNodes().simulate('mouseEnter');
         expect(handleSpy.callCount).toBe(3);
         expect(handleSpy.calledWith('about')).toBe(true);
 
-        wrapper.find('.qa-Application-Link-account').simulate('mouseEnter');
+        wrapper.find('.qa-Application-Link-account').hostNodes().simulate('mouseEnter');
         expect(handleSpy.callCount).toBe(4);
         expect(handleSpy.calledWith('account')).toBe(true);
 
-        wrapper.find('.qa-Application-Link-logout').simulate('mouseEnter');
+        wrapper.find('.qa-Application-Link-logout').hostNodes().simulate('mouseEnter');
         expect(handleSpy.callCount).toBe(5);
         expect(handleSpy.calledWith('logout')).toBe(true);
     });
@@ -105,7 +105,7 @@ describe('Application component', () => {
         props.openDrawer = sinon.spy();
         const wrapper = getWrapper(props);
         const nextProps = getProps();
-        nextProps.userData = {data: {}};
+        nextProps.userData = { data: {} };
         window.resizeTo(1200, 1000);
         expect(window.innerWidth).toEqual(1200);
         const spy = sinon.spy(Application.prototype, 'componentWillReceiveProps');
@@ -135,11 +135,12 @@ describe('Application component', () => {
         const props = getProps();
         const wrapper = getWrapper(props);
         const resize = wrapper.instance().handleResize;
-        expect(eventSpy.called).toBe(false);
+        expect(eventSpy.calledWith('resize', resize)).toBe(false);
         wrapper.unmount();
         expect(eventSpy.called).toBe(true);
         expect(eventSpy.calledWith('resize', resize)).toBe(true);
         eventSpy.restore();
+        unmountSpy.restore();
     });
 
     it('handleResize should call forceUpdate', () => {

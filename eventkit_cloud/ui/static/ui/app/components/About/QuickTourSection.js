@@ -17,38 +17,35 @@ export class QuickTourSection extends Component {
         this.setArrowVisibility = this.setArrowVisibility.bind(this);
         this.state = {
             step: 0,
-            showLeftArrow: false,
-            showRightArrow: false,
-            arrowsVisible: false
-        }
-    };
+            arrowsVisible: false,
+        };
+    }
 
     nextStep() {
-        if(this.state.step + 1 < this.props.steps.length) {
+        if (this.state.step + 1 < this.props.steps.length) {
             this.setState({step: this.state.step + 1});
-        }
-        else {
+        } else {
             this.setState({step: 0});
         }
     }
 
     previousStep() {
-        if(this.state.step > 0) {
-            this.setState({step: this.state.step - 1});
+        if (this.state.step > 0) {
+            this.setState({ step: this.state.step - 1 });
         }
         else {
-            this.setState({step: this.props.steps.length - 1});
+            this.setState({ step: this.props.steps.length - 1 });
         }
     }
 
     goToStep(step) {
-        if(step < this.props.steps.length && step >= 0) {
-            this.setState({step: step});
+        if (step < this.props.steps.length && step >= 0) {
+            this.setState({ step });
         }
     }
 
     setArrowVisibility(visible) {
-        this.setState({arrowsVisible: visible});
+        this.setState({ arrowsVisible: visible });
     }
 
     render() {
@@ -62,37 +59,37 @@ export class QuickTourSection extends Component {
 
         const styles = {
             numberStyle: {
-                border: '2px solid #fff', 
-                borderRadius: '50%', 
-                width: numberDiameter, 
-                height: numberDiameter, 
-                textAlign: 'center', 
-                fontSize: numberFontSize, 
-                display: 'inline-block', 
-                marginLeft: '10px', 
-                backgroundColor: '#fff', 
+                border: '2px solid #fff',
+                borderRadius: '50%',
+                width: numberDiameter,
+                height: numberDiameter,
+                textAlign: 'center',
+                fontSize: numberFontSize,
+                display: 'inline-block',
+                marginLeft: '10px',
+                backgroundColor: '#fff',
                 color: '#4598bf',
                 cursor: 'pointer',
             },
             nextImgArrow: {
-                width: '48px', 
-                height: '48px', 
-                minWidth: 'none', 
+                width: '48px',
+                height: '48px',
+                minWidth: 'none',
                 color: '#4598bf',
-                textAlign: 'center', 
+                textAlign: 'center',
             },
             nextImgDiv: {
-                position: 'absolute', 
-                width: '48px', 
-                height: '48px', 
+                position: 'absolute',
+                width: '48px',
+                height: '48px',
                 minWidth: 'none',
                 borderRadius: '50%',
-                color: '#4598bf', 
+                color: '#4598bf',
                 top: 'calc(50% - 24px)',
-                backgroundColor: 'rgba(69, 152, 191, 0.2)'
-            }
+                backgroundColor: 'rgba(69, 152, 191, 0.2)',
+            },
         };
-        
+
         return (
             <div style={{margin: '10px 0px'}}>
                 <Card className={'qa-QuickTourSection-Card'} initiallyExpanded={true} style={{backgroundColor: '#dcdcdc'}}>
@@ -140,8 +137,8 @@ export class QuickTourSection extends Component {
                 </Card>
             </div>
         );
-    };
-};
+    }
+}
 
 QuickTourSection.propTypes = {
     steps: PropTypes.arrayOf(PropTypes.shape({
@@ -149,6 +146,6 @@ QuickTourSection.propTypes = {
         caption: PropTypes.string,
     })).isRequired,
     sectionTitle: PropTypes.string.isRequired,
-}
+};
 
 export default QuickTourSection;

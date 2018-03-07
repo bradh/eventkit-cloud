@@ -9,11 +9,11 @@ import FloatingActionButton from 'material-ui/FloatingActionButton';
 import NavigationArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
 import NavigationArrowForward from 'material-ui/svg-icons/navigation/arrow-forward';
 import NavigationCheck from 'material-ui/svg-icons/navigation/check';
-import { BreadcrumbStepper } from '../components/CreateDataPack/BreadcrumbStepper';
-import ExportAOI from '../components/CreateDataPack/ExportAOI';
-import ExportInfo from '../components/CreateDataPack/ExportInfo';
-import ExportSummary from '../components/CreateDataPack/ExportSummary';
-import * as utils from '../utils/mapUtils';
+import { BreadcrumbStepper } from '../../components/CreateDataPack/BreadcrumbStepper';
+import ExportAOI from '../../components/CreateDataPack/ExportAOI';
+import ExportInfo from '../../components/CreateDataPack/ExportInfo';
+import ExportSummary from '../../components/CreateDataPack/ExportSummary';
+import * as utils from '../../utils/mapUtils';
 
 describe('BreadcrumbStepper component', () => {
     const muiTheme = getMuiTheme();
@@ -40,6 +40,7 @@ describe('BreadcrumbStepper component', () => {
         clearAoiInfo: () => {},
         clearExportInfo: () => {},
         clearJobInfo: () => {},
+        getFormats: () => {},
     });
     const getWrapper = props => (
         shallow(<BreadcrumbStepper {...props} />, {
@@ -69,7 +70,7 @@ describe('BreadcrumbStepper component', () => {
         expect(wrapper.find('.qa-BreadcrumbStepper-CircularProgress')).toHaveLength(1);
     });
 
-    it('render should call getErrorMessage twice', () => {
+    it('render should call getErrorMessage', () => {
         const props = getProps();
         const getMessageSpy = sinon.spy(BreadcrumbStepper.prototype, 'getErrorMessage');
         const wrapper = getWrapper(props);
@@ -82,23 +83,19 @@ describe('BreadcrumbStepper component', () => {
             ],
         };
         wrapper.setProps(nextProps);
-        expect(getMessageSpy.calledTwice).toBe(true);
+        expect(getMessageSpy.called).toBe(true);
     });
 
     it('componentDidMount should set nextDisabled and get providers and formats', () => {
         const props = getProps();
-        const mountSpy = sinon.spy(BreadcrumbStepper.prototype, 'componentDidMount');
         props.exportInfo.exportName = '';
         props.getProviders = sinon.spy();
         props.getFormats = sinon.spy();
         props.setNextDisabled = sinon.spy();
         const wrapper = getWrapper(props);
-        wrapper.instance().componentDidMount();
-        expect(mountSpy.calledOnce).toBe(true);
         expect(props.setNextDisabled.calledOnce).toBe(true);
         expect(props.getProviders.calledOnce).toBe(true);
         expect(props.getFormats.calledOnce).toBe(true);
-        mountSpy.restore();
     });
 
     it('componentWillReceiveProps should push to status page and clearJobInfo', () => {

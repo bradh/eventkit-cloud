@@ -40,24 +40,24 @@ describe('AlertCallout component', () => {
     it('should render the basic elements', () => {
         const props = getProps();
         const wrapper = getWrapper(props);
-        expect(wrapper.find('.qa-RevertDialog-background')).toHaveLength(1);
-        expect(wrapper.find('.qa-RevertDialog-dialog')).toHaveLength(1);
-        expect(wrapper.find('.qa-RevertDialog-header')).toHaveLength(1);
+        expect(wrapper.find('.qa-RevertDialog-background').hostNodes()).toHaveLength(1);
+        expect(wrapper.find('.qa-RevertDialog-dialog').hostNodes()).toHaveLength(1);
+        expect(wrapper.find('.qa-RevertDialog-header').hostNodes()).toHaveLength(1);
         expect(wrapper.find(Clear)).toHaveLength(1);
-        expect(wrapper.find('.qa-RevertDialog-body')).toHaveLength(1);
-        expect(wrapper.find('.qa-RevertDialog-name')).toHaveLength(1);
-        expect(wrapper.find('.qa-RevertDialog-description')).toHaveLength(1);
-        expect(wrapper.find('.qa-RevertDialog-footer')).toHaveLength(1);
-        expect(wrapper.find('.qa-RevertDialog-FlatButton-close')).toHaveLength(1);
-        expect(wrapper.find('.qa-RevertDialog-RaisedButton-revert')).toHaveLength(1);
+        expect(wrapper.find('.qa-RevertDialog-body').hostNodes()).toHaveLength(1);
+        expect(wrapper.find('.qa-RevertDialog-name').hostNodes()).toHaveLength(1);
+        expect(wrapper.find('.qa-RevertDialog-description').hostNodes()).toHaveLength(1);
+        expect(wrapper.find('.qa-RevertDialog-footer').hostNodes()).toHaveLength(1);
+        expect(wrapper.find('.qa-RevertDialog-FlatButton-close').hostNodes()).toHaveLength(1);
+        expect(wrapper.find('.qa-RevertDialog-RaisedButton-revert').hostNodes()).toHaveLength(1);
     });
 
     it('should not render anything if show is false', () => {
         const props = getProps();
         props.show = false;
         const wrapper = getWrapper(props);
-        expect(wrapper.find('.qa-RevertDialog-dialog')).toHaveLength(0);
-        expect(wrapper.find('.qa-RevertDialog-background')).toHaveLength(0);
+        expect(wrapper.find('.qa-RevertDialog-dialog').hostNodes()).toHaveLength(0);
+        expect(wrapper.find('.qa-RevertDialog-background').hostNodes()).toHaveLength(0);
     });
 
     it('Close buttons should call onRevertClose', () => {

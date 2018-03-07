@@ -149,25 +149,19 @@ describe('ProviderRow component', () => {
     it('Cancel MenuItem should call onProviderCancel with uid', () => {
         const props = getProps();
         props.onProviderCancel = sinon.spy();
-        const wrapper = shallow(<ProviderRow {...props} />, { context: { muiTheme } });
-        const menu = shallow(wrapper.find(IconMenu).node, { context: { muiTheme } });
-        menu.setState({ open: true });
-        expect(menu.find(MenuItem)).toHaveLength(2);
-        menu.find(MenuItem).first().simulate('click');
+        const wrapper = getWrapper(props);
+        wrapper.find(IconMenu).props().children[0].props.onClick();
         expect(props.onProviderCancel.calledOnce).toBe(true);
         expect(props.onProviderCancel.calledWith(props.provider.uid)).toBe(true);
     });
 
-    it('View source MenuItem should call handleProviderOpen with uid', () => {
+    it('View source MenuItem should call handleProviderOpen ', () => {
         const props = getProps();
-        props.onProviderCancel = sinon.spy();
-        const wrapper = shallow(<ProviderRow {...props} />, { context: { muiTheme } });
-        const menu = shallow(wrapper.find(IconMenu).node, { context: { muiTheme } });
-        menu.setState({ open: true });
-        expect(menu.find(MenuItem)).toHaveLength(2);
-        menu.find(MenuItem).first().simulate('click');
-        expect(props.onProviderCancel.calledOnce).toBe(true);
-        expect(props.onProviderCancel.calledWith(props.provider.uid)).toBe(true);
+        const openStub = sinon.stub(ProviderRow.prototype, 'handleProviderOpen');
+        const wrapper = getWrapper(props);
+        wrapper.find(IconMenu).props().children[1].props.onClick();
+        expect(openStub.calledOnce).toBe(true);
+        openStub.restore();
     });
 
     it('getTaskDownloadIcon should return an icon that calls handleSingleDownload', () => {
@@ -375,11 +369,12 @@ describe('ProviderRow component', () => {
     it('handleProviderOpen should set provider dialog to open', () => {
         const props = getProps();
         const stateSpy = sinon.spy(ProviderRow.prototype, 'setState');
-        const wrapper = shallow(<ProviderRow {...props} />);
+        const wrapper = getWrapper(props);
         wrapper.instance().handleProviderOpen();
+        wrapper.update();
         expect(stateSpy.calledTwice).toBe(true);
         expect(stateSpy.calledWith({ providerDesc: 'provider description', providerDialogOpen: true })).toBe(true);
-        expect(wrapper.find(BaseDialog).childAt(0).text()).toEqual('provider description');
+        expect(wrapper.find(BaseDialog).props().children).toEqual('provider description');
         stateSpy.restore();
     });
 

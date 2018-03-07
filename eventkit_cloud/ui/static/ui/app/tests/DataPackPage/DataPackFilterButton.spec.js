@@ -1,9 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import sinon from 'sinon';
-import {mount, shallow} from 'enzyme';
+import { mount } from 'enzyme';
 import FlatButton from 'material-ui/FlatButton';
-import EnhancedButton from 'material-ui/internal/EnhancedButton';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import DataPackFilterButton from '../../components/DataPackPage/DataPackFilterButton';
 
@@ -43,18 +42,19 @@ describe('DataPackFilterButton component', () => {
     });
 
     it('should display differently on small vs large screens', () => {
-        window.resizeTo(1000, 900);
-        expect(window.innerWidth).toBe(1000);
+        global.window.resizeTo(1000, 900);
+        expect(global.window.innerWidth).toBe(1000);
         const props = getProps();
-        const wrapper = mount(<DataPackFilterButton {...props}/>, {
-            context: {muiTheme},
-            childContextTypes: {muiTheme: PropTypes.object}
+        const wrapper = mount(<DataPackFilterButton {...props} />, {
+            context: { muiTheme },
+            childContextTypes: { muiTheme: PropTypes.object },
         });
         expect(wrapper.find(FlatButton).props().style.width).toEqual('90px');
         expect(wrapper.find(FlatButton).props().labelStyle.fontSize).toEqual('12px');
 
-        window.resizeTo(400, 500);
-        expect(window.innerWidth).toBe(400);
+        global.window.resizeTo(400, 500);
+        expect(global.window.innerWidth).toBe(400);
+        wrapper.instance().forceUpdate();
         wrapper.update();
         expect(wrapper.find(FlatButton).props().style.width).toEqual('40px');
         expect(wrapper.find(FlatButton).props().labelStyle.fontSize).toEqual('10px');

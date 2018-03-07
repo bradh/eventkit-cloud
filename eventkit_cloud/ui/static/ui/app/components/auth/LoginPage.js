@@ -89,6 +89,7 @@ export class LoginPage extends React.Component {
                                             <strong>ATTENTION</strong>
                                         </div>
                                         <div
+                                            className="qa-LoginPage-disclaimer"
                                             style={{ color: '#fff', paddingRight: '10px' }}
                                             dangerouslySetInnerHTML={
                                                 { __html: this.context.config.LOGIN_DISCLAIMER }

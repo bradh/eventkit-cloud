@@ -36,7 +36,7 @@ export class UserInfo extends Component {
     };
 };
 
-UserInfo.PropTypes = {
+UserInfo.propTypes = {
     user: PropTypes.object.isRequired,
     updateLink: PropTypes.string,
 }

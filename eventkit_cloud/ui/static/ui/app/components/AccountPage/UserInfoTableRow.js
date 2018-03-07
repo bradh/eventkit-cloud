@@ -28,7 +28,7 @@ export class UserInfoTableRow extends Component {
     };
 };
 
-UserInfoTableRow.PropTypes = {
+UserInfoTableRow.propTypes = {
     title: PropTypes.string,
     data: PropTypes.string
 };

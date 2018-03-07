@@ -67,7 +67,7 @@ export class LicenseInfo extends Component {
     };
 };
 
-LicenseInfo.PropTypes = {
+LicenseInfo.propTypes = {
     user: PropTypes.object.isRequired,
     licenses: PropTypes.object.isRequired,
     acceptedLicenses: PropTypes.object.isRequired,

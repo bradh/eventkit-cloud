@@ -65,7 +65,7 @@ export class UserLicense extends Component {
     };
 };
 
-UserLicense.PropTypes = {
+UserLicense.propTypes = {
     license: PropTypes.object.isRequired,
     checked: PropTypes.bool.isRequired,
     onCheck: PropTypes.func.isRequired,

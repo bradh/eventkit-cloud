@@ -10,7 +10,7 @@ class DataPackSearchbar extends React.Component {
     }
 
     handleKeyDown(event) {
-        if(event.key == 'Enter') {
+        if (event.key === 'Enter') {
             const text = event.target.value || '';
             this.props.onSearchSubmit(text);
         }
@@ -25,37 +25,37 @@ class DataPackSearchbar extends React.Component {
         const styles = {
             container: {
                 color: 'white',
-                height: '36px', 
-                width: '100%', 
+                height: '36px',
+                width: '100%',
                 backgroundColor: '#16212f',
-                lineHeight: '36px'
+                lineHeight: '36px',
             },
             hint: {
                 color: '#5a5a5a',
                 height: '36px',
                 lineHeight: 'inherit',
                 bottom: '0px',
-                paddingLeft: '5px'
+                paddingLeft: '5px',
             },
             input: {
                 color: '#cacaca',
-                paddingLeft: '5px'
+                paddingLeft: '5px',
             },
             underline: {
-                borderBottom: '1px solid #5a5a5a', 
-                bottom: '0px'
+                borderBottom: '1px solid #5a5a5a',
+                bottom: '0px',
             },
             underlineFocus: {
-                borderBottom: '2px solid #4498c0', 
-                bottom: '0px'
-            }
+                borderBottom: '2px solid #4498c0',
+                bottom: '0px',
+            },
         };
 
         return (
             <TextField
-                className={'qa-DataPackSearchBar-TextField'}
+                className="qa-DataPackSearchBar-TextField"
                 style={styles.container}
-                hintText={'Search DataPacks'}
+                hintText="Search DataPacks"
                 hintStyle={styles.hint}
                 inputStyle={styles.input}
                 onChange={this.handleChange}
@@ -68,8 +68,8 @@ class DataPackSearchbar extends React.Component {
 }
 
 DataPackSearchbar.propTypes = {
-    onSearchChange: PropTypes.func,
-    onSearchSubmit: PropTypes.func,
+    onSearchChange: PropTypes.func.isRequired,
+    onSearchSubmit: PropTypes.func.isRequired,
 };
 
 export default DataPackSearchbar;

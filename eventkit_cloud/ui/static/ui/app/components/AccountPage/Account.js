@@ -134,7 +134,7 @@ export class Account extends Component {
     };
 };
 
-Account.PropTypes = {
+Account.propTypes = {
     user: PropTypes.object.isRequired,
     licenses: PropTypes.object.isRequired,
     getLicenses: PropTypes.func.isRequired,

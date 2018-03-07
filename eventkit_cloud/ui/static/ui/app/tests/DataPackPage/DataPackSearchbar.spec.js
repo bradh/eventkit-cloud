@@ -28,14 +28,14 @@ describe('DataPackSearchbar component', () => {
         const props = getProps();
         const wrapper = getWrapper(props);
         expect(wrapper.find(TextField)).toHaveLength(1);
-        expect(wrapper.find('.qa-DataPackSearchBar-TextField')).toHaveLength(1);
-        expect(wrapper.find('.qa-DataPackSearchBar-TextField').children().first().text()).toEqual('Search DataPacks');
+        expect(wrapper.find('.qa-DataPackSearchBar-TextField').hostNodes()).toHaveLength(1);
+        expect(wrapper.find('.qa-DataPackSearchBar-TextField').hostNodes().text()).toEqual('Search DataPacks');
     });
 
     it('should call handleChange', () => {
         const props = getProps();
         const e = {target: {value: 'Search Text'}};
-        const changeSpy = new sinon.spy(DataPackSearchbar.prototype, 'handleChange');
+        const changeSpy = sinon.spy(DataPackSearchbar.prototype, 'handleChange');
         const wrapper = getWrapper(props);
         expect(changeSpy.called).toBe(false);
         wrapper.find('input').simulate('change', e);
@@ -47,7 +47,7 @@ describe('DataPackSearchbar component', () => {
         const props = getProps();
         const change = {target: {value: 'Search Text'}};
         const enter = {keyCode: 13, which: 13, key: 'enter'};
-        const keySpy = new sinon.spy(DataPackSearchbar.prototype, 'handleKeyDown');
+        const keySpy = sinon.spy(DataPackSearchbar.prototype, 'handleKeyDown');
         const wrapper = getWrapper(props);
         expect(keySpy.calledOnce).toBe(false);
         wrapper.find('input').simulate('change', change);
@@ -57,7 +57,7 @@ describe('DataPackSearchbar component', () => {
 
     it('handleKeyDown should call onSearchSubmit if key is Enter', () => {
         const props = getProps();
-        props.onSearchSubmit = new sinon.spy();
+        props.onSearchSubmit = sinon.spy();
         const wrapper = getWrapper(props);
         const e = {key: 'Enter', target: {value: 'search text'}};
         wrapper.instance().handleKeyDown(e);
@@ -67,7 +67,7 @@ describe('DataPackSearchbar component', () => {
 
     it('handleKeyDown should call onSearchSubmit with empty string if there is no value', () => {
         const props = getProps();
-        props.onSearchSubmit = new sinon.spy();
+        props.onSearchSubmit = sinon.spy();
         const wrapper = getWrapper(props);
         const e = {key: 'Enter', target: {value: null}};
         wrapper.instance().handleKeyDown(e);
@@ -77,7 +77,7 @@ describe('DataPackSearchbar component', () => {
 
     it('handleChange should call onSearchChange', () => {
         const props = getProps();
-        props.onSearchChange = new sinon.spy();
+        props.onSearchChange = sinon.spy();
         const wrapper = getWrapper(props);
         const e = {target: {value: 'search text'}};
         wrapper.instance().handleChange(e, 'search text');
@@ -87,7 +87,7 @@ describe('DataPackSearchbar component', () => {
 
     it('handleChanger should call onSearchChange with empty string', () => {
         const props = getProps();
-        props.onSearchChange = new sinon.spy();
+        props.onSearchChange = sinon.spy();
         const wrapper = getWrapper(props);
         wrapper.instance().handleChange(null, null);
         expect(props.onSearchChange.calledOnce).toBe(true);

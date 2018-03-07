@@ -51,7 +51,7 @@ describe('LoadButtons component', () => {
     it('Load less should call handleLoadLess', () => {
         let props = getProps();
         props.loadLessDisabled = false;
-        props.handleLoadLess = new sinon.spy();
+        props.handleLoadLess = sinon.spy();
         const wrapper = getWrapper(props);
         wrapper.find(RaisedButton).first().find('button').simulate('click');
         expect(props.handleLoadLess.calledOnce).toBe(true);
@@ -60,15 +60,15 @@ describe('LoadButtons component', () => {
     it('Load more should call handleLoadMore', () => {
         let props = getProps();
         props.loadMoreDisabled = false;
-        props.handleLoadMore = new sinon.spy();
+        props.handleLoadMore = sinon.spy();
         const wrapper = getWrapper(props);
         wrapper.find(RaisedButton).last().find('button').simulate('click');
         expect(props.handleLoadMore.calledOnce).toBe(true);
     });
 
     it('should set width in state on mount', () => {
-        const mountSpy = new sinon.spy(LoadButtons.prototype, 'componentDidMount');
-        const stateSpy = new sinon.spy(LoadButtons.prototype, 'setState');
+        const mountSpy = sinon.spy(LoadButtons.prototype, 'componentDidMount');
+        const stateSpy = sinon.spy(LoadButtons.prototype, 'setState');
         const props = getProps();
         const wrapper = getWrapper(props);
         expect(mountSpy.calledOnce).toBe(true);
@@ -79,15 +79,16 @@ describe('LoadButtons component', () => {
     });
 
     it('should update width in state if component updates with new width', () => {
-        const updateSpy = new sinon.spy(LoadButtons.prototype, 'componentDidUpdate');
-        const stateSpy = new sinon.spy(LoadButtons.prototype, 'setState');
+        const updateSpy = sinon.spy(LoadButtons.prototype, 'componentDidUpdate');
+        const stateSpy = sinon.spy(LoadButtons.prototype, 'setState');
         const props = getProps();
         const wrapper = getWrapper(props);
         expect(stateSpy.calledOnce).toBe(true);
-        ReactDOM.findDOMNode = (that) => {return {offsetWidth: 12}}
+        ReactDOM.findDOMNode = () => ({ offsetWidth: 12 });
+        wrapper.instance().forceUpdate();
         wrapper.update();
         expect(stateSpy.calledTwice);
-        expect(stateSpy.calledWith({width: 12})).toBe(true);
+        expect(stateSpy.calledWith({ width: 12 })).toBe(true);
         updateSpy.restore();
         stateSpy.restore();
     });

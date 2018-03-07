@@ -2,11 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 export class ThreeStepInfo extends Component {
-
-    constructor(props) {
-        super(props);
-    };
-
     render() {
         const styles = {
             threeStepCaption: {

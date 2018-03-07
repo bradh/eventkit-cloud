@@ -1,5 +1,6 @@
 import 'babel-polyfill';
 import React from 'react';
+import raf from 'raf';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { connectedReduxRedirect } from 'redux-auth-wrapper/history3/redirect'
@@ -18,7 +19,7 @@ import StatusDownload from './components/StatusDownloadPage/StatusDownload';
 import { isBrowserValid } from './utils/generic';
 import { login, userActive } from './actions/userActions';
 
-
+raf.polyfill();
 const store = configureStore();
 const history = syncHistoryWithStore(browserHistory, store);
 
