@@ -1,5 +1,6 @@
 from django.conf import settings
 import logging
+from geocode_auth import getAuthHeaders
 from abc import ABCMeta, abstractmethod, abstractproperty
 import requests
 import json
@@ -86,7 +87,7 @@ class ReverseGeocodeAdapter:
 
         if not self.url:
             return
-        response = requests.get(self.url, params=payload).json()
+        response = requests.get(self.url, params=payload, headers=getAuthHeaders()).json()
         logger.info(response)
         assert (isinstance(response, dict))
         return self.create_geojson(response)

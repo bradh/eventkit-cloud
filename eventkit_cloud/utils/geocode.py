@@ -1,6 +1,7 @@
 from django.conf import settings
 import logging
 from abc import ABCMeta, abstractmethod, abstractproperty
+from geocode_auth import getAuthHeaders
 import requests
 
 
@@ -83,7 +84,7 @@ class GeocodeAdapter:
         payload = self.get_payload(query)
         if not self.url:
             return
-        response = requests.get(self.url, params=payload).json()
+        response = requests.get(self.url, params=payload, headers=getAuthHeaders()).json()
         assert (isinstance(response, dict))
         return self.create_geojson(response)
 
@@ -144,7 +145,7 @@ class GeocodeAdapter:
         ]
         return {"type": "Polygon",
                 "coordinates": coordinates}
-
+                        
     def map_properties(self, feature, properties=None):
         props = properties or feature.get('properties')
         if props:
@@ -183,7 +184,6 @@ class GeoNames(GeocodeAdapter):
 
 
 class Pelias(GeocodeAdapter):
-
     def get_payload(self, query):
         return {'text': query}
 
@@ -233,6 +233,7 @@ class Geocode(object):
             logger.error("Both a `GEOCODING_API_URL` and a `GEOCODING_API_TYPE` must be defined in the settings.")
             raise Exception('A geocoder configuration was not provided, contact an administrator.')
         self.geocoder = self.get_geocoder(type, url)
+        
 
     @property
     def map(self):
