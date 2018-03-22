@@ -1,6 +1,6 @@
 from django.conf import settings
 from abc import ABCMeta, abstractmethod, abstractproperty
-from geocode_auth import getAuthHeaders
+from geocode_auth import getAuthHeaders, authenticate
 import logging
 import requests
 import json
@@ -32,6 +32,13 @@ class Convert(object):
         return self.converter.get_data(query)
     
     def get(self, query):
+        result = self.get_data(query)
+        if('error' in result and result['error'] == 'jwt expired'):
+            authenticate()
+            result = get_data(query)
+        return result
+    
+    def get_data(self, query):
         url = getattr(settings, 'CONVERT_API_URL')
         args = { "from":"mgrs", "to":"decdeg","q":str(query)}
         try: 
